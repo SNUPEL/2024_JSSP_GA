@@ -1,3 +1,19 @@
+"""
+GAEngine Class
+
+This script defines the GAEngine class, which implements a genetic algorithm (GA) engine 
+for job shop scheduling. The engine includes functionalities for crossover, mutation, 
+selection, local search, and parallel execution.
+
+Functions:
+    migrate_top_10_percent(ga_engines, migration_order, island_mode): Migrates top 10 percent of individuals between GA engines.
+    GAEngine.__init__(self, config, op_data, crossover, mutation, selection, ...): Initializes the GA engine with the given parameters.
+    GAEngine.evolve(self, index, sync_generation, sync_lock, events=None): Evolves the population for a number of generations.
+    GAEngine.apply_local_search(self, individual): Applies local search optimization to an individual.
+    GAEngine.apply_pso(self, individual): Applies PSO optimization to an individual.
+    GAEngine.save_csv(self, all_generations, execution_time, file_path): Saves the GA generations data to a CSV file.
+"""
+
 import sys
 import os
 import random
@@ -21,6 +37,14 @@ import datetime
 # from Meta.ORtools import ORToolsOptimizer
 
 def migrate_top_10_percent(ga_engines, migration_order, island_mode):
+    """
+    Migrates top 10 percent of individuals between GA engines.
+    
+    Parameters:
+        ga_engines (list): List of GA engines.
+        migration_order (list): Order of migration between GA engines.
+        island_mode (int): Mode of migration (e.g., sequential or random).
+    """
     num_islands = len(ga_engines)
     for source_island_idx in range(num_islands):
         target_island_idx = migration_order[source_island_idx]
@@ -33,7 +57,55 @@ def migrate_top_10_percent(ga_engines, migration_order, island_mode):
             print(f"Migrating from GA{source_island_idx + 1} to GA{target_island_idx + 1}")
 
 class GAEngine:
+    """
+    Implements a genetic algorithm (GA) engine for job shop scheduling.
+    
+    Attributes:
+        config: Configuration object for the GA engine.
+        op_data: Operation data for the job shop.
+        crossover: Crossover operator for the GA.
+        mutation: Mutation operator for the GA.
+        selection: Selection operator for the GA.
+        local_search: Local search methods for the GA.
+        pso: PSO optimizer for the GA.
+        selective_mutation: Selective mutation operator for the GA.
+        elite_ratio (float): Proportion of elites in the population.
+        best_time: Best execution time recorded.
+        ga_engines: List of GA engines for island model.
+        island_mode (int): Mode of migration between islands.
+        migration_frequency (int): Frequency of migration between islands.
+        dataset_filename (str): Filename of the dataset.
+        local_search_frequency (int): Frequency of local search application.
+        selective_mutation_frequency (int): Frequency of selective mutation application.
+        random_seed (int): Seed for random number generation.
+        local_search_top_percentage (float): Top percentage of individuals for local search.
+        population (Population): Population of individuals in the GA.
+    """
+    
     def __init__(self, config, op_data, crossover, mutation, selection, local_search=None, pso=None, selective_mutation=None, elite_ratio=0.1, ga_engines=None, island_mode=1, migration_frequency=10, initialization_mode='1', dataset_filename=None, initial_population=None, local_search_frequency=2, selective_mutation_frequency=10, random_seed=None):
+        """
+        Initializes the GA engine with the given parameters.
+        
+        Parameters:
+            config: Configuration object for the GA engine.
+            op_data: Operation data for the job shop.
+            crossover: Crossover operator for the GA.
+            mutation: Mutation operator for the GA.
+            selection: Selection operator for the GA.
+            local_search (list): List of local search methods for the GA (default is None).
+            pso (PSO): PSO optimizer for the GA (default is None).
+            selective_mutation (SelectiveMutation): Selective mutation operator for the GA (default is None).
+            elite_ratio (float): Proportion of elites in the population (default is 0.1).
+            ga_engines (list): List of GA engines for island model (default is None).
+            island_mode (int): Mode of migration between islands (default is 1).
+            migration_frequency (int): Frequency of migration between islands (default is 10).
+            initialization_mode (str): Mode of population initialization (default is '1').
+            dataset_filename (str): Filename of the dataset (default is None).
+            initial_population (Population): Initial population of individuals (default is None).
+            local_search_frequency (int): Frequency of local search application (default is 2).
+            selective_mutation_frequency (int): Frequency of selective mutation application (default is 10).
+            random_seed (int): Seed for random number generation (default is None).
+        """
         self.config = config
         self.op_data = op_data
         self.crossover = crossover
@@ -53,8 +125,6 @@ class GAEngine:
         self.selective_mutation_frequency = selective_mutation_frequency
         self.random_seed = random_seed
         self.local_search_top_percentage = 0.1  
-        # self.new_populations = [[] for _ in range(len(ga_engines))]
-        # self.ortools_optimizer = ortools_optimizer
 
         if initialization_mode == '2':
             self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
@@ -65,6 +135,18 @@ class GAEngine:
 
 
     def evolve(self, index, sync_generation, sync_lock, events=None):
+        """
+        Evolves the population for a number of generations.
+        
+        Parameters:
+            index (int): Index of the current GA engine.
+            sync_generation (Array): Synchronized array of generation counters.
+            sync_lock (Lock): Lock object for synchronizing access to shared resources.
+            events (list): List of events for synchronization (default is None).
+        
+        Returns:
+            tuple: Best individual, crossover operator, mutation operator, all generations data, execution time, best time.
+        """
         try:
             all_generations = []
             start_time = time.time()
@@ -80,10 +162,6 @@ class GAEngine:
                 print(f"GA{index+1} Population: {self.population is not None}")
                 print(f"GA{index+1} Best Individual: {best_individual is not None}")
 
-                # # 여기에서 각 개체의 정보를 출력
-                # for ind in self.population.individuals:
-                #     print(ind)
-
                 num_elites = int(self.elite_ratio * len(self.population.individuals))
                 elites = sorted(self.population.individuals, key=lambda ind: ind.fitness, reverse=True)[:num_elites]
 
@@ -94,10 +172,6 @@ class GAEngine:
                 for elite in elites:
                     random_index = random.randint(0, len(self.population.individuals) - 1)
                     self.population.individuals[random_index] = elite
-
-                # if sync_generation[index] > 0 and self.selective_mutation and sync_generation[index] % self.selective_mutation_frequency == 0:
-                #     print(f'GA{index+1}_Selective Mutation 전반부 적용')
-                #     self.selective_mutation.mutate(self.population.individuals, self.config)
 
                 if sync_generation[index] > 0 and sync_generation[index] % self.local_search_frequency == 0:
                     print(f"GA{index+1}_Applying local search")
@@ -138,7 +212,7 @@ class GAEngine:
 
                     print(f"Migration order: {migration_order}")  # Migration order 출력
 
-                    # 현재 GA의 new_population 업데이트(만약 Population size가 100이라면 //20을 하게 되면 5개를 고르는거임)
+                    # 현재 GA의 new_population 업데이트 (최적 개체들 선택)
                     new_populations[index] = sorted(self.population.individuals, key=lambda ind: ind.fitness, reverse=True)[:max(1, len(self.population.individuals) // 5)]
 
                     # 마이그레이션 수행 (현재 GA에 대해서만) 랜덤 삽입
@@ -150,56 +224,6 @@ class GAEngine:
                                     replaced_individual = self.ga_engines[i].population.individuals[random.randint(0, len(self.population.individuals) - 1)]
                                     self.ga_engines[i].population.individuals[random.randint(0, len(self.population.individuals) - 1)] = migrating_individual
                                     print(f"Migrating from GA{index+1} to GA{i+1}: Migrating individual fitness: {migrating_individual.fitness}, Replaced individual fitness: {replaced_individual.fitness}")
-                    # 이게 진짜.
-                    # for i in range(len(self.ga_engines)):
-                    #     target_index = migration_order[i]
-                    #     if target_index != i:
-                    #         if new_populations[i]:  # Source population should be from `i` not `target_index`
-                    #             elites_indices = sorted(range(len(self.ga_engines[target_index].population.individuals)), key=lambda idx: self.ga_engines[target_index].population.individuals[idx].fitness, reverse=True)[:len(new_populations[i])]
-                    #             for j in range(len(new_populations[i])):
-                    #                 migrating_individual = copy.deepcopy(new_populations[i][j])
-                    #                 replaced_individual = self.ga_engines[target_index].population.individuals[elites_indices[j]]
-                    #                 self.ga_engines[target_index].population.individuals[elites_indices[j]] = migrating_individual
-                    #                 print(f"Migrating from GA{i+1} to GA{target_index+1}: Migrating individual fitness: {migrating_individual.fitness}, Replaced individual fitness: {replaced_individual.fitness}")
-                    # for i in range(len(self.ga_engines)):
-                    #     target_index = migration_order[i]
-                    #     if target_index != i:
-                    #         if new_populations[i]:  # Source population은 `i`이고, 타겟 population은 `target_index`입니다.
-                    #             elites_indices = sorted(
-                    #                 range(len(self.ga_engines[i].population.individuals)),
-                    #                 key=lambda idx: self.ga_engines[i].population.individuals[idx].fitness,
-                    #                 reverse=True
-                    #             )[:len(new_populations[i])]
-                    #             for j in range(len(new_populations[i])):
-                    #                 migrating_individual = copy.deepcopy(new_populations[i][j])
-                    #                 replaced_individual = self.ga_engines[target_index].population.individuals[elites_indices[j]]
-                    #                 self.ga_engines[target_index].population.individuals[elites_indices[j]] = migrating_individual
-                    #                 print(f"Migrating from GA{i+1} to GA{target_index+1}: Migrating individual fitness: {migrating_individual.fitness}, Replaced individual fitness: {replaced_individual.fitness}")
-
-
-                    # for i in range(len(self.ga_engines)):
-                    #     target_index = migration_order[i]
-                    #     if target_index != i:
-                    #         if new_populations[target_index]:
-                    #             # GA1의 최적 개체들을 덮어씌우기 위해 GA1의 최적 개체들 인덱스를 선택
-                    #             elites_indices = sorted(range(len(self.ga_engines[i].population.individuals)), key=lambda idx: self.ga_engines[i].population.individuals[idx].fitness, reverse=True)[:len(new_populations[target_index])]
-                    #             for j in range(len(new_populations[target_index])):
-                    #                 migrating_individual = copy.deepcopy(new_populations[target_index][j])
-                    #                 replaced_individual = self.ga_engines[i].population.individuals[elites_indices[j]]
-                    #                 self.ga_engines[i].population.individuals[elites_indices[j]] = migrating_individual
-                    #                 print(f"Migrating from GA{target_index+1} to GA{i+1}: Migrating individual fitness: {migrating_individual.fitness}, Replaced individual fitness: {replaced_individual.fitness}")
-
-                    # 이게 진짜.
-                    # for i in range(len(self.ga_engines)):
-                    #     target_index = migration_order[i]
-                    #     if target_index != i:
-                    #         if new_populations[i]:  # Source population should be from `i` not `target_index`
-                    #             elites_indices = sorted(range(len(self.ga_engines[target_index].population.individuals)), key=lambda idx: self.ga_engines[target_index].population.individuals[idx].fitness, reverse=True)[:len(new_populations[i])]
-                    #             for j in range(len(new_populations[i])):
-                    #                 migrating_individual = copy.deepcopy(new_populations[i][j])
-                    #                 replaced_individual = self.ga_engines[target_index].population.individuals[elites_indices[j]]
-                    #                 self.ga_engines[target_index].population.individuals[elites_indices[j]] = migrating_individual
-                    #                 print(f"Migrating from GA{i+1} to GA{target_index+1}: Migrating individual fitness: {migrating_individual.fitness}, Replaced individual fitness: {replaced_individual.fitness}")
 
                     self.population.individuals = sorted(self.population.individuals, key=lambda ind: ind.fitness, reverse=True)
                     best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
@@ -209,7 +233,6 @@ class GAEngine:
                 if sync_generation[index] > 0 and self.selective_mutation and sync_generation[index] % self.selective_mutation_frequency == 0:
                     print(f'GA{index+1}_Selective Mutation 전반부 적용')
                     self.selective_mutation.mutate(self.population.individuals, self.config)
-
 
                 print(f"GA{index+1}_Generation {sync_generation[index]} evaluated")
                 current_best = min(self.population.individuals, key=lambda ind: ind.makespan)
@@ -259,8 +282,16 @@ class GAEngine:
             print(f"Exception during evolution in GA{index+1}: {e}")
             return None, None, None, [], 0, None
 
-
     def apply_local_search(self, individual):
+        """
+        Applies local search optimization to an individual.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         best_individual = copy.deepcopy(individual)
         for method in self.local_search_methods:
             improved_individual = method.optimize(best_individual, self.config)
@@ -269,6 +300,15 @@ class GAEngine:
         return best_individual
 
     def apply_pso(self, individual):
+        """
+        Applies PSO optimization to an individual.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         best_individual = copy.deepcopy(individual)
         optimized_individual = self.pso.optimize(best_individual, self.config)
         if optimized_individual.makespan < best_individual.makespan:
@@ -276,6 +316,14 @@ class GAEngine:
         return best_individual
 
     def save_csv(self, all_generations, execution_time, file_path):
+        """
+        Saves the GA generations data to a CSV file.
+        
+        Parameters:
+            all_generations (list): List of all generations data.
+            execution_time (float): Total execution time of the GA.
+            file_path (str): Path to the CSV file.
+        """
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         file_path_with_timestamp = file_path.replace('.csv', f'_{timestamp}.csv')
 
@@ -286,9 +334,9 @@ class GAEngine:
                 for seq, makespan in individuals:
                     csvwriter.writerow([generation, seq, makespan])
 
-    # def apply_ORtools(self, individual):
-    #     best_individual = copy.deepcopy(individual)
-    #     optimized_individual = self.ortools_optimizer.optimize(best_individual, self.config)
-    #     if optimized_individual.makespan < best_individual.makespan:
-    #         best_individual = optimized_individual
-    #     return best_individual
+    def apply_ORtools(self, individual):
+        best_individual = copy.deepcopy(individual)
+        optimized_individual = self.ortools_optimizer.optimize(best_individual, self.config)
+        if optimized_individual.makespan < best_individual.makespan:
+            best_individual = optimized_individual
+        return best_individual

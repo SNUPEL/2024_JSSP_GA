@@ -1,4 +1,17 @@
-# Crossover/JBX.py
+"""
+Job-Based Crossover (JBX) Class
+
+This script defines the JBX class, which implements the job-based crossover 
+method for genetic algorithms. The job-based crossover method segments the 
+sequence of jobs and swaps segments between parents to create offspring.
+
+Classes:
+    JBX: A class to perform job-based crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the job-based crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -8,10 +21,33 @@ from GAS.Crossover.base import Crossover
 from GAS.Individual import Individual
 
 class JBX(Crossover):
+    """
+    Implements the job-based crossover (JBX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the JBX class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the job-based crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             return parent1, parent2
 

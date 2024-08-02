@@ -1,4 +1,18 @@
-# Crossover/LOX.py
+"""
+Linear Order Crossover (LOX) Class
+
+This script defines the LOXCrossover class, which implements the linear order 
+crossover method for genetic algorithms. The linear order crossover method 
+swaps sublists between parents to create offspring while maintaining the order 
+of the remaining elements.
+
+Classes:
+    LOXCrossover: A class to perform linear order crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the linear order crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -9,10 +23,33 @@ from GAS.Individual import Individual
 
 # Linear order crossover 
 class LOXCrossover(Crossover):
+    """
+    Implements the linear order crossover (LOX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the LOXCrossover class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the linear order crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             return parent1, parent2
 
@@ -49,5 +86,3 @@ class LOXCrossover(Crossover):
                 child2[i] = remaining2.pop(0)
 
         return Individual(config=parent1.config, seq=child1, op_data=parent1.op_data), Individual(config=parent1.config, seq=child2, op_data=parent1.op_data)
-
-# Test the LOX

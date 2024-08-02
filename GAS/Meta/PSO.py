@@ -1,9 +1,47 @@
+"""
+PSO Class
+
+This script defines the PSO (Particle Swarm Optimization) class, which implements 
+the particle swarm optimization algorithm for local search optimization in genetic 
+algorithms. The class iteratively improves the job sequence by adjusting the 
+positions and velocities of particles to minimize the makespan.
+
+Classes:
+    PSO: A class to perform particle swarm optimization.
+
+Functions:
+    optimize(individual, config): Optimizes the job sequence using PSO.
+    create_new_individual(individual, new_seq, config): Creates a new individual with the optimized sequence.
+    ensure_valid_sequence(seq, config): Ensures that the job sequence is valid.
+"""
+
 import copy
 import random
 import numpy as np
 
 class PSO:
+    """
+    Implements the particle swarm optimization (PSO) algorithm for local search optimization.
+    
+    Attributes:
+        num_particles (int): The number of particles in the swarm.
+        num_iterations (int): The number of iterations to perform.
+        w (float): The inertia coefficient.
+        c1 (float): The cognitive coefficient (personal best).
+        c2 (float): The social coefficient (global best).
+    """
+    
     def __init__(self, num_particles=30, num_iterations=100, w=0.7, c1=1.5, c2=1.5):
+        """
+        Initializes the PSO class with the specified parameters.
+        
+        Parameters:
+            num_particles (int): The number of particles (default is 30).
+            num_iterations (int): The number of iterations (default is 100).
+            w (float): The inertia coefficient (default is 0.7).
+            c1 (float): The cognitive coefficient (default is 1.5).
+            c2 (float): The social coefficient (default is 1.5).
+        """
         self.num_particles = num_particles
         self.num_iterations = num_iterations
         self.w = w  # 관성 계수
@@ -11,6 +49,16 @@ class PSO:
         self.c2 = c2  # 전체 최적 위치로 이동하는 계수
 
     def optimize(self, individual, config):
+        """
+        Optimizes the job sequence using particle swarm optimization.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         print("PSO 시작")
         particles = [self.create_new_individual(individual, individual.seq, config) for _ in range(self.num_particles)]
         velocities = [np.random.uniform(-1, 1, len(individual.seq)) for _ in range(self.num_particles)]
@@ -54,7 +102,7 @@ class PSO:
 
             current_best_particle = min(particles, key=lambda p: p.fitness)
             current_best_fitness = current_best_particle.fitness
-            # print(f"Iteration {iteration}: Current best fitness = {current_best_fitness}, Global best fitness = {global_best_fitness}")
+
             for i, p in enumerate(particles):
                 print(f"Particle {i}: Sequence = {p.seq}, Makespan = {p.makespan}, Fitness = {p.fitness}")
 
@@ -62,6 +110,17 @@ class PSO:
         return global_best_particle
 
     def create_new_individual(self, individual, new_seq, config):
+        """
+        Creates a new individual with the optimized sequence.
+        
+        Parameters:
+            individual (Individual): The original individual.
+            new_seq (list): The optimized job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The new individual with the optimized sequence.
+        """
         new_individual = copy.deepcopy(individual)
         new_individual.seq = new_seq
         new_individual.job_seq = new_individual.get_repeatable()
@@ -72,6 +131,16 @@ class PSO:
         return new_individual
 
     def ensure_valid_sequence(self, seq, config):
+        """
+        Ensures that the job sequence is valid.
+        
+        Parameters:
+            seq (list): The job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            list: The valid job sequence.
+        """
         num_jobs = config.n_job
         num_machines = config.n_machine
         job_counts = {job: 0 for job in range(num_jobs)}

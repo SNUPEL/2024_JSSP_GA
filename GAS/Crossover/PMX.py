@@ -1,4 +1,17 @@
-# Crossover/PMX.py
+"""
+Partial-Mapped Crossover (PMX) Class
+
+This script defines the PMXCrossover class, which implements the partial-mapped 
+crossover method for genetic algorithms. The partial-mapped crossover method 
+swaps segments between parents and preserves the mapping of the remaining elements.
+
+Classes:
+    PMXCrossover: A class to perform partial-mapped crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the partial-mapped crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -7,12 +20,35 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from GAS.Crossover.base import Crossover
 from GAS.Individual import Individual
 
-# partial-mapped crossover
+# Partial-Mapped Crossover
 class PMXCrossover(Crossover):
+    """
+    Implements the partial-mapped crossover (PMX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the PMXCrossover class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the partial-mapped crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             # If the random number is greater than pc, return parents as children without crossover
             return parent1, parent2

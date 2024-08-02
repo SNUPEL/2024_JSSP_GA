@@ -1,3 +1,23 @@
+"""
+Individual Class
+
+This script defines the Individual class, which represents a solution to the job shop scheduling problem. 
+It includes functionalities for interpreting solutions, evaluating makespan and fitness, 
+and generating machine order sequences.
+
+Functions:
+    calculate_score(x_array, y_array): Calculates various scores between two arrays.
+    swap_digits(num): Swaps the digits of a two-digit number.
+    Individual.__init__(self, config=None, seq=None, solution_seq=None, op_data=None): Initializes an individual with the given parameters.
+    Individual.__str__(self): Returns a string representation of the individual.
+    Individual.calculate_fitness(self, target_makespan): Calculates the fitness of the individual.
+    Individual.interpret_solution(self, s): Interprets a solution sequence by swapping digits.
+    Individual.get_repeatable(self): Generates a repeatable job sequence.
+    Individual.get_feasible(self): Generates a feasible sequence.
+    Individual.get_machine_order(self): Generates the machine order for the sequence.
+    Individual.evaluate(self, machine_order): Evaluates the makespan and MIO score for the individual.
+"""
+
 import sys
 import os
 import math
@@ -17,6 +37,16 @@ from visualization.GUI import GUI
 from MachineInputOrder.utils import kendall_tau_distance, spearman_footrule_distance, spearman_rank_correlation, bubble_sort_distance, MSE
 
 def calculate_score(x_array, y_array):
+    """
+    Calculates various scores between two arrays.
+    
+    Parameters:
+        x_array (list): First array.
+        y_array (list): Second array.
+    
+    Returns:
+        list: List of scores.
+    """
     score = [0.0 for i in range(6)]
     for i in range(len(x_array)):
         score[0] += kendall_tau_distance(x_array[i], y_array[i])
@@ -29,6 +59,15 @@ def calculate_score(x_array, y_array):
     return score
 
 def swap_digits(num):
+    """
+    Swaps the digits of a two-digit number.
+    
+    Parameters:
+        num (int): The number to swap digits of.
+    
+    Returns:
+        int: The number with swapped digits.
+    """
     if num < 10:
         return num * 10
     else:
@@ -37,9 +76,36 @@ def swap_digits(num):
         return units * 10 + tens
 
 class Individual:
+    """
+    Represents a solution to the job shop scheduling problem.
+    
+    Attributes:
+        fitness (float): The fitness of the individual.
+        monitor (Monitor): The monitor object for simulation.
+        seq (list): The sequence of operations.
+        config: Configuration object for the job shop.
+        op_data (list): Operation data for the job shop.
+        MIO (list): Machine input order.
+        MIO_sorted (list): Sorted machine input order.
+        job_seq (list): Repeatable job sequence.
+        feasible_seq (list): Feasible sequence.
+        machine_order (list): Machine order for the sequence.
+        makespan (float): The makespan of the individual.
+        mio_score (float): The MIO score of the individual.
+        score (list): List of various scores.
+    """
+    
     def __init__(self, config=None, seq=None, solution_seq=None, op_data=None):
+        """
+        Initializes an individual with the given parameters.
+        
+        Parameters:
+            config: Configuration object for the job shop.
+            seq (list): The sequence of operations.
+            solution_seq (list): The solution sequence.
+            op_data (list): Operation data for the job shop.
+        """
         self.fitness = None
-        # self.scaled_fitness = None # 새로 넣은것. fitness때매
         self.monitor = None  # Add monitor attribute
         if solution_seq is not None:
             self.seq = self.interpret_solution(solution_seq)
@@ -56,46 +122,51 @@ class Individual:
         self.makespan, self.mio_score = self.evaluate(self.machine_order)
         self.score = calculate_score(self.MIO, self.MIO_sorted)
         self.calculate_fitness(config.target_makespan)  # Ensure target_makespan is passed
-        '''
-        오리지날 
-        self.calculate_fitness()
-        '''
 
     def __str__(self):
+        """
+        Returns a string representation of the individual.
+        
+        Returns:
+            str: String representation of the individual.
+        """
         return f"Individual(makespan={self.makespan}, fitness={self.fitness})"
-        # return f"Individual(seq={self.seq}, makespan={self.makespan}, fitness={self.fitness})"
 
     def calculate_fitness(self, target_makespan):
-        if self.makespan == 0:
-            raise ValueError("Makespan is zero, which will cause division by zero error.")
-        self.fitness = 1 / (self.makespan / target_makespan)
-        # print(f"Calculated fitness: {self.fitness} for makespan: {self.makespan} and target_makespan: {target_makespan}")
-        return self.fitness
+        """
+        Calculates the fitness of the individual.
         
+        Parameters:
+            target_makespan (float): The target makespan for normalization.
         
-        '''
-        fitness 수정 본 (적용은 잘되었지만 1300이 target_makespan인데 makespan이 1380인데도 1.0으로 도출)
-    def calculate_fitness(self, target_makespan):
+        Returns:
+            float: The fitness of the individual.
+        """
         if self.makespan == 0:
             raise ValueError("Makespan is zero, which will cause division by zero error.")
         self.fitness = 1 / (self.makespan / target_makespan)
         return self.fitness
-        '''
-
-        '''
-        오리지날 calculate_fitness
-
-        if self.makespan == 0:
-            raise ValueError("Makespan is zero, which will cause division by zero error.")
-        self.fitness = 1 / self.makespan
-        return self.fitness
-        '''
 
     def interpret_solution(self, s):
+        """
+        Interprets a solution sequence by swapping digits.
+        
+        Parameters:
+            s (list): The solution sequence.
+        
+        Returns:
+            list: The interpreted sequence.
+        """
         modified_list = [swap_digits(num) for num in s]
         return modified_list
 
     def get_repeatable(self):
+        """
+        Generates a repeatable job sequence.
+        
+        Returns:
+            list: The repeatable job sequence.
+        """
         cumul = 0
         sequence_ = np.array(self.seq)
         for i in range(self.config.n_job):
@@ -105,6 +176,12 @@ class Individual:
         return sequence_.tolist()
 
     def get_feasible(self):
+        """
+        Generates a feasible sequence.
+        
+        Returns:
+            list: The feasible sequence.
+        """
         temp = 0
         cumul = 0
         sequence_ = np.array(self.seq)
@@ -117,6 +194,12 @@ class Individual:
         return sequence_
 
     def get_machine_order(self):
+        """
+        Generates the machine order for the sequence.
+        
+        Returns:
+            list: The machine order for the sequence.
+        """
         m_list = []
         for num in self.feasible_seq:
             idx_j = num % self.config.n_machine
@@ -132,6 +215,15 @@ class Individual:
         return m_order
 
     def evaluate(self, machine_order):
+        """
+        Evaluates the makespan and MIO score for the individual.
+        
+        Parameters:
+            machine_order (list): The machine order for the sequence.
+        
+        Returns:
+            tuple: Makespan and MIO score.
+        """
         env = simpy.Environment()
         self.monitor = Monitor(self.config)
         model = dict()
@@ -160,10 +252,6 @@ class Individual:
             self.MIO.append(mio)
             self.MIO_sorted.append(np.sort(mio))
 
-        # mio_score = np.sum(np.abs(np.subtract(np.array(mio), np.array(sorted(mio)))))
-        # return model['Sink'].last_arrival, mio_score
         mio_score = np.sum(np.abs(np.subtract(np.array(mio), np.array(sorted(mio)))))
         makespan = model['Sink'].last_arrival
-        # print(f"Calculated makespan: {makespan} and mio_score: {mio_score}")
-        return makespan, mio_score        
-            
+        return makespan, mio_score

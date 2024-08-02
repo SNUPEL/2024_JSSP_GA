@@ -1,3 +1,15 @@
+"""
+Gantt Chart Generator
+
+This script defines functions to generate a Gantt chart from a machine log. 
+The chart visualizes the schedule of jobs on different machines over time.
+
+Functions:
+    generate_colors(n): Generates n distinct colors.
+    color(row, color_map): Returns the color associated with a job based on the color map.
+    Gantt(machine_log, config, makespan): Generates and displays/saves a Gantt chart.
+"""
+
 import pandas as pd
 from matplotlib.patches import Patch
 import matplotlib.pyplot as plt
@@ -8,14 +20,43 @@ import matplotlib.colors as mcolors  # 추가된 부분
 simmode = ''
 
 def generate_colors(n):
-    """Generate n distinct colors."""
+    """
+    Generates n distinct colors.
+    
+    Parameters:
+        n (int): Number of distinct colors to generate.
+    
+    Returns:
+        list: List of hex color strings.
+    """
     colors = plt.cm.get_cmap('tab10', n).colors
     return [mcolors.rgb2hex(c) for c in colors]  # 수정된 부분
 
 def color(row, color_map):
+    """
+    Returns the color associated with a job based on the color map.
+    
+    Parameters:
+        row (pd.Series): A row from the machine log DataFrame.
+        color_map (dict): Dictionary mapping job prefixes to colors.
+    
+    Returns:
+        str: Hex color string associated with the job.
+    """
     return color_map[row['Job'][0:5]]
 
 def Gantt(machine_log, config, makespan):
+    """
+    Generates and displays/saves a Gantt chart from the machine log.
+    
+    Parameters:
+        machine_log (pd.DataFrame): DataFrame containing machine log data.
+        config: Configuration object with simulation settings.
+        makespan (int): The makespan value to display on the Gantt chart.
+    
+    Returns:
+        bytes: Image bytes of the generated Gantt chart.
+    """
     unique_parts = machine_log['Job'].apply(lambda x: x[:5]).unique()
     num_parts = len(unique_parts)
     

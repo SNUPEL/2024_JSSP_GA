@@ -1,3 +1,19 @@
+"""
+SelectiveMutation Class
+
+This script defines the SelectiveMutation class, which implements a selective 
+mutation method for genetic algorithms. The selective mutation method applies 
+different mutation probabilities to different segments of the population based 
+on their fitness.
+
+Classes:
+    SelectiveMutation: A class to perform selective mutation on a population.
+
+Functions:
+    mutate(population, config): Performs the selective mutation operation on a population.
+    apply_mutation(individual, config, lower_bits): Applies inversion mutation to a segment of the individual's sequence.
+"""
+
 import sys
 import os
 import random
@@ -7,12 +23,36 @@ from GAS.Mutation.base import Mutation
 from GAS.Individual import Individual
 
 class SelectiveMutation(Mutation):
+    """
+    Implements a selective mutation method for genetic algorithms.
+    
+    Attributes:
+        pm_high (float): The high probability of mutation.
+        pm_low (float): The low probability of mutation.
+        rank_divide (float): The proportion of the population considered "good."
+    """
+    
     def __init__(self, pm_high, pm_low, rank_divide):
+        """
+        Initializes the SelectiveMutation class with the specified parameters.
+        
+        Parameters:
+            pm_high (float): The high probability of mutation.
+            pm_low (float): The low probability of mutation.
+            rank_divide (float): The proportion of the population considered "good."
+        """
         self.pm_high = pm_high  # 높은 돌연변이 확률
         self.pm_low = pm_low    # 낮은 돌연변이 확률
         self.rank_divide = rank_divide
 
     def mutate(self, population, config):
+        """
+        Performs the selective mutation operation on a population.
+        
+        Parameters:
+            population (list): The population to mutate.
+            config: Configuration object with simulation settings.
+        """
         # 적합도에 따라 개체군을 랭킹합니다.
         ranked_population = sorted(population, key=lambda ind: ind.fitness, reverse=True)
         divide_index = int(len(ranked_population) * self.rank_divide)
@@ -30,7 +70,17 @@ class SelectiveMutation(Mutation):
                 self.apply_mutation(ind, config, lower_bits=False)
 
     def apply_mutation(self, individual, config, lower_bits):
-        # print(f'selective_mutation 적용')
+        """
+        Applies inversion mutation to a segment of the individual's sequence.
+        
+        Parameters:
+            individual (Individual): The individual to mutate.
+            config: Configuration object with simulation settings.
+            lower_bits (bool): Whether to apply mutation to the lower half of the sequence.
+        
+        Returns:
+            Individual: The mutated individual.
+        """
         seq = individual.seq[:]
         if lower_bits:
             # 염색체의 하위 부분에 돌연변이를 적용합니다.
@@ -43,6 +93,5 @@ class SelectiveMutation(Mutation):
         seq[start:end] = seq[start:end][::-1]
         individual.seq = seq
         individual.calculate_fitness(config.target_makespan)
-        # print(f'selective_mutation 적용 완료')
-
+        
         return individual

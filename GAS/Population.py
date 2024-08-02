@@ -1,4 +1,20 @@
-# Population.py
+"""
+Population and Genetic Algorithm Utilities
+
+This script contains classes and functions for managing populations and performing genetic algorithm operations
+such as crossover, mutation, and selection. It includes classes for representing operations, machines, 
+and job shop scheduling problems.
+
+Classes:
+    Operation: Represents an operation in the job shop.
+    MIOMachine: Represents a machine in the job shop.
+    JSSP: Handles job shop scheduling problems.
+    GifflerThompson: Applies Giffler-Thompson heuristic.
+    Population: Manages a population of individuals.
+
+Functions:
+    print_console: A flag for enabling/disabling console output.
+"""
 
 import copy
 import numpy as np
@@ -9,6 +25,19 @@ from Data.Dataset.Dataset import Dataset
 print_console = False
 
 class Operation:
+    """
+    Represents an operation in the job shop.
+    
+    Attributes:
+        job (int): Job ID.
+        precedence (int): Operation precedence.
+        machine (MIOMachine): Machine assigned to the operation.
+        idx (int): Index of the operation.
+        job_ready (bool): Flag indicating if the job is ready.
+        machine_ready (bool): Flag indicating if the machine is ready.
+        op_prior (Operation): Prior operation in the job sequence.
+        op_following (Operation): Following operation in the job sequence.
+    """
     def __init__(self, i, j, machine, n_machine):
         self.job = i
         self.precedence = j
@@ -20,6 +49,16 @@ class Operation:
         self.op_following = None
 
 class MIOMachine:
+    """
+    Represents a machine in the job shop.
+    
+    Attributes:
+        id (int): Machine ID.
+        op_ready (list): List of ready operations.
+        op_by_order (list): Operations sorted by order.
+        current_position (int): Current position in the operation list.
+        finished (bool): Flag indicating if all operations are finished.
+    """
     def __init__(self, id, n_machine):
         self.id = id
         self.op_ready = []
@@ -28,6 +67,9 @@ class MIOMachine:
         self.finished = False
 
     def initialize_op_ready(self):
+        """
+        Initializes the list of ready operations.
+        """
         while self.current_position < len(self.op_by_order) and not self.op_by_order[self.current_position]:
             self.current_position += 1
         if self.current_position < len(self.op_by_order):
@@ -36,6 +78,9 @@ class MIOMachine:
                 op.machine_ready = True
 
     def update_op_ready(self):
+        """
+        Updates the list of ready operations.
+        """
         while not self.op_ready and not self.finished:
             self.current_position += 1
             if self.current_position >= len(self.op_by_order):
@@ -46,6 +91,15 @@ class MIOMachine:
                     op.machine_ready = True
 
 class JSSP:
+    """
+    Handles job shop scheduling problems.
+    
+    Attributes:
+        dataset (Dataset): The dataset for the job shop.
+        op_data (list): Operation data.
+        op_list (list): List of operations.
+        machine_list (list): List of machines.
+    """
     def __init__(self, dataset):
         self.dataset = dataset
         self.op_data = dataset.op_data
@@ -64,13 +118,19 @@ class JSSP:
         for i in range(self.dataset.n_machine):
             self.machine_list[i].initialize_op_ready()
 
-        # 연결 관계 수립
+        # Establish connections between operations
         for i in range(self.dataset.n_job):
             for j in range(1, self.dataset.n_machine):
                 self.op_list[i][j].op_prior = self.op_list[i][j - 1]
                 self.op_list[i][j - 1].op_following = self.op_list[i][j]
 
     def get_seq(self):
+        """
+        Generates a sequence of operations.
+        
+        Returns:
+            list: The sequence of operation indices.
+        """
         self.ready = []
         self.seq = []
         for i in range(self.dataset.n_job):
@@ -106,7 +166,7 @@ class JSSP:
 
                 op.machine.update_op_ready()
 
-                # check
+                # Check if the following operation is ready
                 if op.op_following.job_ready and op.op_following.machine_ready:
                     if op.op_following not in self.ready:
                         self.ready.append(op.op_following)
@@ -125,11 +185,28 @@ class JSSP:
         return s
 
 class GifflerThompson:
+    """
+    Applies Giffler-Thompson heuristic for optimizing job shop scheduling.
+    
+    Attributes:
+        priority_rules (list): List of priority rules.
+        default_priority_rule (str): Default priority rule.
+    """
     def __init__(self, priority_rules=None):
         self.priority_rules = ['SPT', 'LPT', 'MWR', 'LWR', 'MOR', 'LOR', 'EDD']
         self.default_priority_rule = priority_rules if priority_rules else 'basic'
 
     def optimize(self, individual, config):
+        """
+        Optimizes the given individual using Giffler-Thompson heuristic.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+            config: Configuration object for the job shop.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         best_individual = copy.deepcopy(individual)
         best_individual.calculate_fitness(config.target_makespan)
         best_rule = "basic"
@@ -138,7 +215,6 @@ class GifflerThompson:
         default_schedule = self.giffler_thompson(individual.seq, individual.op_data, config, self.default_priority_rule)
         default_individual = self.create_new_individual(individual, default_schedule, config)
         default_individual.calculate_fitness(config.target_makespan)
-        # print(f"Default rule (basic) fitness: {default_individual.fitness}")
 
         best_fitness = default_individual.fitness
         best_individuals = [(default_individual, "basic")]
@@ -148,7 +224,6 @@ class GifflerThompson:
             schedule = self.giffler_thompson(individual.seq, individual.op_data, config, rule)
             optimized_individual = self.create_new_individual(individual, schedule, config)
             optimized_individual.calculate_fitness(config.target_makespan)
-            # print(f"Rule {rule} fitness: {optimized_individual.fitness}")
 
             if optimized_individual.fitness > best_fitness:
                 best_fitness = optimized_individual.fitness
@@ -158,13 +233,36 @@ class GifflerThompson:
                 best_individuals.append((optimized_individual, rule))
 
         selected_individual, selected_rule = random.choice(best_individuals)
-        # print(f"Selected rule: {selected_rule}, Selected individual: {selected_individual}")
         return selected_individual
 
     def giffler_thompson(self, seq, op_data, config, priority_rule):
+        """
+        Applies Giffler-Thompson heuristic with the given priority rule.
+        
+        Parameters:
+            seq (list): Sequence of operations.
+            op_data (list): Operation data.
+            config: Configuration object for the job shop.
+            priority_rule (str): Priority rule to apply.
+        
+        Returns:
+            list: Optimized sequence of operations.
+        """
         return self.apply_priority_rule(seq, op_data, config, priority_rule)
 
     def apply_priority_rule(self, seq, op_data, config, priority_rule):
+        """
+        Applies the specified priority rule to the sequence of operations.
+        
+        Parameters:
+            seq (list): Sequence of operations.
+            op_data (list): Operation data.
+            config: Configuration object for the job shop.
+            priority_rule (str): Priority rule to apply.
+        
+        Returns:
+            list: Sorted sequence of operations.
+        """
         def safe_get_op_data(x, idx):
             try:
                 return op_data[x // config.n_machine][x % config.n_machine][idx]
@@ -190,6 +288,17 @@ class GifflerThompson:
         return sorted_seq
 
     def create_new_individual(self, individual, new_seq, config):
+        """
+        Creates a new individual with the given sequence.
+        
+        Parameters:
+            individual (Individual): The original individual.
+            new_seq (list): The new sequence of operations.
+            config: Configuration object for the job shop.
+        
+        Returns:
+            Individual: The new individual.
+        """
         new_individual = copy.deepcopy(individual)
         new_individual.seq = new_seq
         new_individual.job_seq = new_individual.get_repeatable()
@@ -199,6 +308,14 @@ class GifflerThompson:
         return new_individual
 
 class Population:
+    """
+    Manages a population of individuals for the genetic algorithm.
+    
+    Attributes:
+        config: Configuration object for the job shop.
+        op_data (list): Operation data.
+        individuals (list): List of individuals in the population.
+    """
     def __init__(self, config, op_data, random_seed=None):
         self.config = config
         self.op_data = op_data
@@ -209,6 +326,18 @@ class Population:
 
     @classmethod
     def from_mio(cls, config, op_data, dataset_filename, random_seed=None):
+        """
+        Initializes a population using the MIO method.
+        
+        Parameters:
+            config: Configuration object for the job shop.
+            op_data (list): Operation data.
+            dataset_filename (str): Path to the dataset file.
+            random_seed (int): Seed for random number generation.
+        
+        Returns:
+            Population: The initialized population.
+        """
         dataset = Dataset(dataset_filename)
         jssp = JSSP(dataset)
         if random_seed is not None:
@@ -221,6 +350,18 @@ class Population:
 
     @classmethod
     def from_giffler_thompson(cls, config, op_data, dataset_filename, random_seed=None):
+        """
+        Initializes a population using the Giffler-Thompson method.
+        
+        Parameters:
+            config: Configuration object for the job shop.
+            op_data (list): Operation data.
+            dataset_filename (str): Path to the dataset file.
+            random_seed (int): Seed for random number generation.
+        
+        Returns:
+            Population: The initialized population.
+        """
         dataset = Dataset(dataset_filename)
         giffler_thompson = GifflerThompson()
         if random_seed is not None:
@@ -236,6 +377,12 @@ class Population:
         return population
 
     def evaluate(self, target_makespan):
+        """
+        Evaluates the fitness of each individual in the population.
+        
+        Parameters:
+            target_makespan (int): Target makespan for fitness calculation.
+        """
         for individual in self.individuals:
             individual.makespan, individual.mio_score = individual.evaluate(individual.machine_order)
             individual.calculate_fitness(target_makespan)
@@ -252,6 +399,9 @@ class Population:
             self.boltzmann_scaling()
 
     def min_max_scaling(self):
+        """
+        Applies min-max scaling to the fitness values.
+        """
         fitness_values = [ind.fitness for ind in self.individuals]
         min_fitness = min(fitness_values)
         max_fitness = max(fitness_values)
@@ -264,11 +414,17 @@ class Population:
                 individual.scaled_fitness = 1.0  # In case all fitness values are the same
 
     def rank_scaling(self):
+        """
+        Applies rank scaling to the fitness values.
+        """
         sorted_individuals = sorted(self.individuals, key=lambda ind: ind.fitness, reverse=True)
         for rank, individual in enumerate(sorted_individuals):
             individual.scaled_fitness = rank + 1  # 순위를 적합도로 사용
 
     def sigma_scaling(self):
+        """
+        Applies sigma scaling to the fitness values.
+        """
         fitness_values = [ind.fitness for ind in self.individuals]
         mean_fitness = np.mean(fitness_values)
         std_fitness = np.std(fitness_values)
@@ -280,6 +436,12 @@ class Population:
                 individual.scaled_fitness = 1  # 표준편차가 0인 경우
 
     def boltzmann_scaling(self, T=1.0):
+        """
+        Applies Boltzmann scaling to the fitness values.
+        
+        Parameters:
+            T (float): Temperature parameter for Boltzmann scaling.
+        """
         fitness_values = [ind.fitness for ind in self.individuals]
         exp_values = np.exp(fitness_values / T)
         sum_exp_values = np.sum(exp_values)
@@ -288,9 +450,21 @@ class Population:
             individual.scaled_fitness = exp_values[self.individuals.index(individual)] / sum_exp_values
 
     def select(self, selection):
+        """
+        Selects individuals from the population using the specified selection method.
+        
+        Parameters:
+            selection: Selection method to use.
+        """
         self.individuals = [selection.select(self.individuals) for _ in range(self.config.population_size)]
 
     def crossover(self, crossover):
+        """
+        Applies crossover to the population.
+        
+        Parameters:
+            crossover: Crossover method to use.
+        """
         next_generation = []
         for i in range(0, len(self.individuals), 2):
             parent1, parent2 = self.individuals[i], self.individuals[i + 1]
@@ -299,8 +473,20 @@ class Population:
         self.individuals = next_generation
 
     def mutate(self, mutation):
+        """
+        Applies mutation to the population.
+        
+        Parameters:
+            mutation: Mutation method to use.
+        """
         for individual in self.individuals:
             mutation.mutate(individual)
 
     def preserve_elites(self, elites):
+        """
+        Preserves the top elite individuals in the population.
+        
+        Parameters:
+            elites (list): List of elite individuals to preserve.
+        """
         self.individuals[:len(elites)] = elites

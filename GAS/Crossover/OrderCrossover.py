@@ -1,4 +1,18 @@
-# Crossover/OrderCrossover.py
+"""
+Order Crossover (OX) Class
+
+This script defines the OrderCrossover class, which implements the order 
+crossover method for genetic algorithms. The order crossover method creates 
+offspring by taking a subsequence from one parent and preserving the order of 
+the remaining elements from the other parent.
+
+Classes:
+    OrderCrossover: A class to perform order crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the order crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -7,12 +21,35 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from GAS.Crossover.base import Crossover
 from GAS.Individual import Individual
 
-# OrderCrossover
+# Order Crossover
 class OrderCrossover(Crossover):
+    """
+    Implements the order crossover (OX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the OrderCrossover class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the order crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             return parent1, parent2
 

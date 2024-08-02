@@ -1,4 +1,18 @@
-# Crossover/CX.py
+"""
+Cycle Crossover (CX) Class
+
+This script defines the CXCrossover class, which implements the cycle crossover
+method for genetic algorithms. The cycle crossover method ensures that each
+position in the offspring receives a value from one of the parents, forming cycles
+to preserve the order.
+
+Classes:
+    CXCrossover: A class to perform cycle crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the cycle crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -9,17 +23,50 @@ from GAS.Individual import Individual
 
 # Cycle crossover 
 class CXCrossover(Crossover):
+    """
+    Implements the cycle crossover (CX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the CXCrossover class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the cycle crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             return parent1, parent2
 
         size = len(parent1.seq)
-        child1, child2 = [None]*size, [None]*size
+        child1, child2 = [None] * size, [None] * size
 
         def create_cycle(parent1_seq, parent2_seq):
+            """
+            Creates a cycle from the sequences of the parents.
+            
+            Parameters:
+                parent1_seq (list): The sequence of the first parent.
+                parent2_seq (list): The sequence of the second parent.
+            
+            Returns:
+                list: A list of indices forming a cycle.
+            """
             cycle = []
             index = 0
             while index not in cycle:

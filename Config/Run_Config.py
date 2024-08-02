@@ -1,3 +1,28 @@
+"""
+Run Configuration
+
+This script defines the Run_Config class, which is used to configure the 
+parameters for running a simulation or optimization algorithm. 
+
+Attributes:
+    n_job (int): Number of jobs.
+    n_machine (int): Number of machines.
+    n_op (int): Number of operations.
+    population_size (int): Size of the population for the genetic algorithm.
+    generations (int): Number of generations for the genetic algorithm.
+    print_console (bool): Flag to print output to console.
+    save_log (bool): Flag to save the log.
+    save_machinelog (bool): Flag to save the machine log.
+    show_gantt (bool): Flag to show the Gantt chart.
+    save_gantt (bool): Flag to save the Gantt chart.
+    show_gui (bool): Flag to show the GUI.
+    trace_object (str): Object to be traced.
+    title (str): Title for the Gantt chart.
+    tabu_search_iterations (int): Number of iterations for tabu search.
+    hill_climbing_iterations (int): Number of iterations for hill climbing.
+    simulated_annealing_iterations (int): Number of iterations for simulated annealing.
+    ga_index (int): Index for the genetic algorithm run.
+"""
 import os
 import datetime
 
@@ -12,6 +37,28 @@ class Run_Config:
                  trace_object='Process4', title=None,
                  tabu_search_iterations=100, hill_climbing_iterations=100, simulated_annealing_iterations=100,
                  ga_index=0):
+        """
+        Initializes the Run_Config class with the specified parameters.
+
+        Parameters:
+            n_job (int): Number of jobs.
+            n_machine (int): Number of machines.
+            n_op (int): Number of operations.
+            population_size (int): Size of the population for the genetic algorithm.
+            generations (int): Number of generations for the genetic algorithm.
+            print_console (bool): Flag to print output to console.
+            save_log (bool): Flag to save the log.
+            save_machinelog (bool): Flag to save the machine log.
+            show_gantt (bool): Flag to show the Gantt chart.
+            save_gantt (bool): Flag to save the Gantt chart.
+            show_gui (bool): Flag to show the GUI.
+            trace_object (str): Object to be traced.
+            title (str): Title for the Gantt chart.
+            tabu_search_iterations (int): Number of iterations for tabu search.
+            hill_climbing_iterations (int): Number of iterations for hill climbing.
+            simulated_annealing_iterations (int): Number of iterations for simulated annealing.
+            ga_index (int): Index for the genetic algorithm run.
+        """                 
 
         self.n_job = n_job
         self.n_machine = n_machine

@@ -1,11 +1,52 @@
+"""
+HillClimbing Class
+
+This script defines the HillClimbing class, which implements the hill climbing 
+algorithm for local search optimization in genetic algorithms. The class iteratively 
+improves the job sequence to minimize the makespan and improve the fitness of the individual.
+
+Classes:
+    HillClimbing: A class to perform hill climbing local search optimization.
+
+Functions:
+    optimize(individual, config): Optimizes the job sequence using hill climbing.
+    get_neighbors(individual, config): Generates neighboring solutions by swapping jobs.
+    create_new_individual(individual, new_seq, config): Creates a new individual with the optimized sequence.
+    ensure_valid_sequence(seq, config): Ensures that the job sequence is valid.
+"""
+
 import copy
-# 기존     def __init__(self, iterations=100):
+
 class HillClimbing:
+    """
+    Implements the hill climbing algorithm for local search optimization.
+    
+    Attributes:
+        iterations (int): The number of iterations to perform.
+        stop_search (bool): Flag to indicate when to stop the search.
+    """
+    
     def __init__(self, iterations=30):
+        """
+        Initializes the HillClimbing class with the specified number of iterations.
+        
+        Parameters:
+            iterations (int): The number of iterations to perform (default is 30).
+        """
         self.iterations = iterations
         self.stop_search = False
 
     def optimize(self, individual, config):
+        """
+        Optimizes the job sequence using hill climbing.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         print(f"HillClimbing 시작 - Initial Individual: {individual.seq}, Makespan: {individual.makespan}, Fitness: {individual.fitness}")        
         best_solution = copy.deepcopy(individual)
         best_makespan = individual.makespan
@@ -34,6 +75,16 @@ class HillClimbing:
         return best_solution
 
     def get_neighbors(self, individual, config):
+        """
+        Generates neighboring solutions by swapping jobs.
+        
+        Parameters:
+            individual (Individual): The individual to generate neighbors for.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            list: A list of neighboring individuals.
+        """
         neighbors = []
         seq = individual.seq
         for i in range(len(seq) - 1):
@@ -45,6 +96,17 @@ class HillClimbing:
         return neighbors
 
     def create_new_individual(self, individual, new_seq, config):
+        """
+        Creates a new individual with the optimized sequence.
+        
+        Parameters:
+            individual (Individual): The original individual.
+            new_seq (list): The optimized job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The new individual with the optimized sequence.
+        """
         new_individual = copy.deepcopy(individual)
         new_individual.seq = new_seq
         new_individual.job_seq = new_individual.get_repeatable()
@@ -55,6 +117,16 @@ class HillClimbing:
         return new_individual
 
     def ensure_valid_sequence(self, seq, config):
+        """
+        Ensures that the job sequence is valid.
+        
+        Parameters:
+            seq (list): The job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            list: The valid job sequence.
+        """
         num_jobs = config.n_job
         num_machines = config.n_machine
         job_counts = {job: 0 for job in range(num_jobs)}

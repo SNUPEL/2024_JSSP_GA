@@ -1,3 +1,18 @@
+"""
+Partially Shifted Crossover (PSX) Class
+
+This script defines the PSXCrossover class, which implements the partially 
+shifted crossover method for genetic algorithms. The partially shifted crossover 
+method exchanges partial schedules between parents and adjusts the offspring 
+to ensure valid sequences.
+
+Classes:
+    PSXCrossover: A class to perform partially shifted crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the partially shifted crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -8,10 +23,33 @@ from GAS.Crossover.base import Crossover
 from GAS.Individual import Individual
 
 class PSXCrossover(Crossover):
+    """
+    Implements the partially shifted crossover (PSX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the PSXCrossover class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the partially shifted crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             return parent1, parent2
 
@@ -41,6 +79,17 @@ class PSXCrossover(Crossover):
 
         # Step 3: Legalize the proto-offspring by removing excess genes and adding missing genes
         def legalize(proto, original):
+            """
+            Adjusts the proto-offspring to ensure valid sequences by removing excess genes
+            and adding missing genes.
+            
+            Parameters:
+                proto (list): The proto-offspring sequence.
+                original (list): The original parent sequence.
+            
+            Returns:
+                list: The legalized offspring sequence.
+            """
             original_set = set(original)
             proto_set = set(proto)
             
@@ -61,12 +110,5 @@ class PSXCrossover(Crossover):
         final_offspring1 = legalize(proto_offspring1, parent1.seq)
         final_offspring2 = legalize(proto_offspring2, parent2.seq)
 
-
-
         return Individual(config=parent1.config, seq=final_offspring1, op_data=parent1.op_data), Individual(config=parent2.config, seq=final_offspring2, op_data=parent2.op_data)
 
-# Example usage
-# parent1_seq = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-# parent2_seq = [3, 1, 7, 8, 4, 6, 9, 5, 2]
-# crossover = PSXCrossover(0.9)
-# offspring1, offspring2 = crossover.cross(parent1, parent2)

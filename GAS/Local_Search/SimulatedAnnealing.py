@@ -1,9 +1,47 @@
+"""
+SimulatedAnnealing Class
+
+This script defines the SimulatedAnnealing class, which implements the simulated 
+annealing algorithm for local search optimization in genetic algorithms. The class 
+iteratively improves the job sequence by exploring neighboring solutions and 
+accepting them based on a probabilistic criterion.
+
+Classes:
+    SimulatedAnnealing: A class to perform simulated annealing local search optimization.
+
+Functions:
+    optimize(individual, config): Optimizes the job sequence using simulated annealing.
+    get_random_neighbor(individual, config): Generates a random neighboring solution.
+    ensure_valid_sequence(seq, config): Ensures that the job sequence is valid.
+    create_new_individual(individual, new_seq, config): Creates a new individual with the optimized sequence.
+"""
+
 import copy
 import math
 import random
 
 class SimulatedAnnealing:
+    """
+    Implements the simulated annealing algorithm for local search optimization.
+    
+    Attributes:
+        initial_temp (float): The initial temperature for the annealing process.
+        cooling_rate (float): The rate at which the temperature decreases.
+        min_temp (float): The minimum temperature for the annealing process.
+        iterations (int): The number of iterations to perform.
+        stop_search (bool): Flag to indicate when to stop the search.
+    """
+    
     def __init__(self, initial_temp=1000, cooling_rate=0.95, min_temp=1, iterations=10):
+        """
+        Initializes the SimulatedAnnealing class with the specified parameters.
+        
+        Parameters:
+            initial_temp (float): The initial temperature (default is 1000).
+            cooling_rate (float): The cooling rate (default is 0.95).
+            min_temp (float): The minimum temperature (default is 1).
+            iterations (int): The number of iterations (default is 10).
+        """
         self.initial_temp = initial_temp
         self.cooling_rate = cooling_rate
         self.min_temp = min_temp
@@ -11,7 +49,16 @@ class SimulatedAnnealing:
         self.stop_search = False  # 종료 조건 플래그 추가
 
     def optimize(self, individual, config):
-        # print(f"Simulated Annealing 시작 - Initial Individual: {individual.seq}, Makespan: {individual.makespan}, Fitness: {individual.fitness}")
+        """
+        Optimizes the job sequence using simulated annealing.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         best_solution = copy.deepcopy(individual)
         current_solution = copy.deepcopy(individual)
         best_makespan = individual.makespan
@@ -34,7 +81,6 @@ class SimulatedAnnealing:
 
             temp *= self.cooling_rate
             iteration += 1
-            # print(f"Iteration {iteration} - Temperature: {temp}, Current Makespan: {current_makespan}, Best Makespan: {best_makespan}")
 
             # 목표 Makespan에 도달하면 Local Search 종료
             if best_solution.fitness >= 1.0:
@@ -42,10 +88,19 @@ class SimulatedAnnealing:
                 self.stop_search = True
                 break
 
-        # print(f"Simulated Annealing 완료 - Optimized Individual: {best_solution.seq}, Makespan: {best_solution.makespan}, Fitness: {best_solution.fitness}")
         return best_solution
 
     def get_random_neighbor(self, individual, config):
+        """
+        Generates a random neighboring solution by swapping two jobs.
+        
+        Parameters:
+            individual (Individual): The individual to generate a neighbor for.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: A neighboring individual.
+        """
         new_seq = copy.deepcopy(individual.seq)
         i, j = random.sample(range(len(new_seq)), 2)
         new_seq[i], new_seq[j] = new_seq[j], new_seq[i]
@@ -54,10 +109,19 @@ class SimulatedAnnealing:
         # Create a new individual and recompute makespan and fitness
         neighbor = self.create_new_individual(individual, new_seq, config)
         neighbor.calculate_fitness(neighbor.config.target_makespan)
-        # print(f"Neighbor: {neighbor.seq}, Makespan: {neighbor.makespan}, Fitness: {neighbor.fitness}")
         return neighbor
 
     def ensure_valid_sequence(self, seq, config):
+        """
+        Ensures that the job sequence is valid.
+        
+        Parameters:
+            seq (list): The job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            list: The valid job sequence.
+        """
         num_jobs = config.n_job
         num_machines = config.n_machine
         job_counts = {job: 0 for job in range(num_jobs)}
@@ -77,6 +141,17 @@ class SimulatedAnnealing:
         return valid_seq
 
     def create_new_individual(self, individual, new_seq, config):
+        """
+        Creates a new individual with the optimized sequence.
+        
+        Parameters:
+            individual (Individual): The original individual.
+            new_seq (list): The optimized job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The new individual with the optimized sequence.
+        """
         new_individual = copy.deepcopy(individual)
         new_individual.seq = new_seq
         new_individual.job_seq = new_individual.get_repeatable()

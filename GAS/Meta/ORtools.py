@@ -1,11 +1,49 @@
+"""
+ORToolsOptimizer Class
+
+This script defines the ORToolsOptimizer class, which uses Google's OR-Tools to 
+solve scheduling problems in genetic algorithms. The class builds and solves a 
+constraint programming model to minimize the makespan of the job schedule.
+
+Classes:
+    ORToolsOptimizer: A class to perform optimization using OR-Tools.
+
+Functions:
+    optimize(individual, config): Optimizes the job sequence using OR-Tools.
+    create_new_individual(individual, new_seq, config): Creates a new individual with the optimized sequence.
+"""
+
 from ortools.sat.python import cp_model
 import copy
 
 class ORToolsOptimizer:
+    """
+    Uses Google's OR-Tools to solve scheduling problems in genetic algorithms.
+    
+    Attributes:
+        num_iterations (int): The number of iterations to perform.
+    """
+    
     def __init__(self, num_iterations=100):
+        """
+        Initializes the ORToolsOptimizer class with the specified number of iterations.
+        
+        Parameters:
+            num_iterations (int): The number of iterations to perform (default is 100).
+        """
         self.num_iterations = num_iterations
 
     def optimize(self, individual, config):
+        """
+        Optimizes the job sequence using OR-Tools.
+        
+        Parameters:
+            individual (Individual): The individual to optimize.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The optimized individual.
+        """
         print("OR-Tools 시작")
         best_individual = self.create_new_individual(individual, individual.seq, config)
 
@@ -58,6 +96,17 @@ class ORToolsOptimizer:
             return best_individual
 
     def create_new_individual(self, individual, new_seq, config):
+        """
+        Creates a new individual with the optimized sequence.
+        
+        Parameters:
+            individual (Individual): The original individual.
+            new_seq (list): The optimized job sequence.
+            config: Configuration object with simulation settings.
+        
+        Returns:
+            Individual: The new individual with the optimized sequence.
+        """
         new_individual = copy.deepcopy(individual)
         new_individual.seq = new_seq
         new_individual.job_seq = new_individual.get_repeatable()
@@ -66,4 +115,3 @@ class ORToolsOptimizer:
         new_individual.makespan, new_individual.mio_score = new_individual.evaluate(new_individual.machine_order)
         new_individual.calculate_fitness(config.target_makespan)
         return new_individual
- 

@@ -1,3 +1,19 @@
+"""
+Substring Exchange Crossover (SXX) Class
+
+This script defines the SXX class, which implements the substring exchange 
+crossover method for genetic algorithms. The substring exchange crossover 
+method swaps substrings between parents and adjusts the offspring to ensure 
+valid sequences.
+
+Classes:
+    SXX: A class to perform substring exchange crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the substring exchange crossover operation on two parents.
+    legalize(proto, original_seq): Adjusts the proto-offspring to ensure valid sequences.
+"""
+
 import sys
 import os
 import random
@@ -8,10 +24,33 @@ from GAS.Individual import Individual
 
 # Substring exchange crossover
 class SXX(Crossover):
+    """
+    Implements the substring exchange crossover (SXX) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the SXX class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the substring exchange crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() < self.pc:
             point1, point2 = sorted(random.sample(range(len(parent1.seq)), 2))
             substring1 = parent1.seq[point1:point2]
@@ -28,6 +67,17 @@ class SXX(Crossover):
         return parent1, parent2
 
     def legalize(self, proto, original_seq):
+        """
+        Adjusts the proto-offspring to ensure valid sequences by removing excess genes
+        and adding missing genes.
+        
+        Parameters:
+            proto (list): The proto-offspring sequence.
+            original_seq (list): The original parent sequence.
+        
+        Returns:
+            list: The legalized offspring sequence.
+        """
         gene_count = {gene: original_seq.count(gene) for gene in original_seq}
         proto_count = {gene: proto.count(gene) for gene in proto}
 

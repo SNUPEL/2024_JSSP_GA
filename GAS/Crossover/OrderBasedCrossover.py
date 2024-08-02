@@ -1,4 +1,18 @@
-# Crossover/OrderBasedCrossover.py
+"""
+Order-Based Crossover (OBC) Class
+
+This script defines the OBC class, which implements the order-based crossover 
+method for genetic algorithms. The order-based crossover method selects positions 
+from one parent and fills the remaining positions in the order they appear in 
+the other parent.
+
+Classes:
+    OBC: A class to perform order-based crossover on two parent individuals.
+
+Functions:
+    cross(parent1, parent2): Performs the order-based crossover operation on two parents.
+"""
+
 import sys
 import os
 import random
@@ -7,17 +21,40 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from GAS.Crossover.base import Crossover
 from GAS.Individual import Individual
 
-# OrderBasedCrossover
+# Order-Based Crossover
 class OBC(Crossover):
+    """
+    Implements the order-based crossover (OBC) method for genetic algorithms.
+    
+    Attributes:
+        pc (float): The probability of crossover.
+    """
+    
     def __init__(self, pc):
+        """
+        Initializes the OBC class with the specified crossover probability.
+        
+        Parameters:
+            pc (float): The probability of crossover.
+        """
         self.pc = pc
 
     def cross(self, parent1, parent2):
+        """
+        Performs the order-based crossover operation on two parents.
+        
+        Parameters:
+            parent1 (Individual): The first parent individual.
+            parent2 (Individual): The second parent individual.
+        
+        Returns:
+            tuple: Two offspring individuals resulting from the crossover.
+        """
         if random.random() > self.pc:
             return parent1, parent2
 
         size = len(parent1.seq)
-        child1, child2 = [None]*size, [None]*size
+        child1, child2 = [None] * size, [None] * size
 
         # Step 1: Select positions from Parent 1
         positions = sorted(random.sample(range(size), random.randint(1, size - 1)))
@@ -42,4 +79,3 @@ class OBC(Crossover):
                 idx2 += 1
 
         return Individual(config=parent1.config, seq=child1, op_data=parent1.op_data), Individual(config=parent1.config, seq=child2, op_data=parent2.op_data)
-

@@ -1,3 +1,14 @@
+"""
+Main script for running the Genetic Algorithm (GA) with various configurations.
+
+This script initializes and runs the GA with different crossover, mutation, selection,
+and local search methods. It supports island parallel GA with different migration strategies.
+
+Functions:
+    run_ga_engine(args): Runs the GA engine for a given configuration.
+    main(): Main function to setup and execute the GA engines.
+"""
+
 import os
 import sys
 import random
@@ -44,7 +55,7 @@ from Local_Search.GifflerThompson_LS import GifflerThompson_LS
 # Meta Heuristic
 from Meta.PSO import PSO  # pso를 추가합니다
 
-# 선택 mutation 
+# Selective Mutation
 from GAS.Mutation.SelectiveMutation import SelectiveMutation
 
 from Config.Run_Config import Run_Config
@@ -78,6 +89,7 @@ abz5 = 1234  10, 10
 ft20 = 1165
 '''
 
+# Configuration for target makespan and migration frequency
 TARGET_MAKESPAN = 1642  # 목표 Makespan
 MIGRATION_FREQUENCY = 300  # Migration frequency 설정
 random_seed = 42  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
@@ -85,6 +97,15 @@ random_seed = 42  # Population 초기화시 일정하게 만들기 위함. None�
 
 
 def run_ga_engine(args):
+    """
+    Runs the GA engine for a given configuration.
+
+    Parameters:
+        args (tuple): Contains the GA engine, index, paths, sync variables, and events.
+
+    Returns:
+        tuple: Contains the best individual, crossover, mutation, generations, execution time, and best time.
+    """    
     ga_engine, index, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events = args
     try:
         best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, events)
@@ -128,6 +149,9 @@ def run_ga_engine(args):
 
 
 def main():
+    """
+    Main function to setup and execute the GA engines.
+    """
     print("Starting main function...")  # 디버그 출력 추가
 
     island_mode = int(input("Select Island-Parallel GA mode (1: Independent, 2: Sequential Migration, 3: Random Migration): "))
@@ -137,6 +161,7 @@ def main():
     print(f"Loading dataset from {file}...")  # 디버그 출력 추가
     dataset = Dataset(file)
 
+    # Custom GA settings    
     base_config = Run_Config(n_job=20, n_machine=20, n_op=400, population_size=10, generations=100, 
                              print_console=False, save_log=True, save_machinelog=True, 
                              show_gantt=False, save_gantt=True, show_gui=False,
