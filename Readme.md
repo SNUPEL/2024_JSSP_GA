@@ -1,188 +1,174 @@
 # 📊 Hybrid Genetic Algorithm with MIO for Solving JSSP
 
-|                   개발자                   |                 개발자                  |                
+|                   Developer               |                Developer               |                
 | :--------------------------------------: | :-----------------------------------: | 
-| [백지원](https://github.com/Jiwon-Baek) | [오현진](https://github.com/hyunjinei) |
+| [Jiwon Baek](https://github.com/Jiwon-Baek) | [Hyunjin Oh](https://github.com/hyunjinei) |
 |                   🧑‍💻 AI-Development |                 🧑‍💻 AI-Development                  |                
 
+
+## 👀 Project Overview
+
+-  📆 Project Duration
+   -  2024.05.11 ~ 2024.06.12 (5 weeks)
+
+
+
+## 💁‍♂️ Project Introduction
+
+**Hybrid Genetic Algorithm with MIO** is an optimization algorithm designed to solve the Job Shop Scheduling Problem (JSSP). 
 <br>
+For more information about MIO, please check [this link](https://github.com/SNUPEL/2024_JSSP_MIO).
 
-## 👀 프로젝트 개요
-
--  📆 프로젝트 기간
-   -  2024.05.11 ~ 2024.06.12 (5주)
+This project tracks job sequences and machine states, using MIO to consider the interactions between jobs and machines for generating initial solutions. It employs various crossover, mutation, and selection methods to find optimal solutions and combines them with local search to achieve better results.
 
 
-<br><br>
+## 💡 Main Functions
 
-## 💁‍♂️ 프로젝트 소개
-
-
-<br>
-
-**Hybrid Genetic Algorithm with MIO**는 JSSP 문제를 해결하기 위한 최적화 알고리즘입니다.
-<br><br>
-이 프로젝트는 작업 순서와 기계 상태를 추적하며, 작업과 기계 간의 상호 관계를 고려한 MIO를 사용하여 초기 해를 생성합니다. 또한, 다양한 교차, 돌연변이 및 선택 방법을 활용하여 최적의 솔루션을 찾아냅니다. 또한 Local Serach와 결합을 통해 보다 나은 최적해를 찾아 냅니다.
-
-<br>
-
-## 💡 주요 기능
-
-### 1️⃣ 전체 절차
+### 1️⃣ Overall Process
 
 <img src="docs/소개이미지.png"/>
 
 <br>
 
-### 2️⃣ GA 개발
+### 2️⃣ GA Development
 
-#### 2.1 Population Initialization
+#### Population Initialization
 
-- Population Initialization 구현 종류
+- Types of Population Initialization
     - **basic**
-        - 랜덤으로 개체 생성
+        - Creates individuals randomly
     - **MIO**
-        - 작업 순서와 기계 상태를 추적, 작업과 기계 간의 상호 관계를 고려하여 초기 해를 생성
-        - 랜덤으로 개체 생성한 후 MIO 사용하여 초기화
+        - Tracks job sequences and machine states, considering the interactions between jobs and machines to generate initial solutions
+        - Initializes after creating random individuals using MIO
     - **GifflerThompson**
-        - 랜덤으로 개체 생성한 후 각 개체마다 Giffler-Thompson 우선순위 규칙('SPT', 'LPT', 'MWR', 'LWR', 'MOR', 'LOR', 'EDD') 중 하나를 무작위로 선택하여 초기화
+        - Creates random individuals and initializes each individual using one of Giffler-Thompson priority rules ('SPT', 'LPT', 'MWR', 'LWR', 'MOR', 'LOR', 'EDD') randomly
 
-<br>
 
-#### 2.2 Crossover
-- Crossover 구현 종류
+#### Crossover
+- Types of Crossover
     - **OrderCrossover (OX)**
-        - 유전자의 순서를 유지하는 데 중점
+        - Focuses on maintaining the order of genes
     - **PMXCrossover (PMX)**
-        - 교차 구간의 매핑을 기반으로 충돌 해결하며 두 부모 간의 부분 문자열 교환
+        - Resolves conflicts based on the mapping of crossover segments and exchanges substrings between two parents
     - **LOXCrossover (LOX)**
-        - 두 부모 간의 유전자 순서를 직선적으로 교차
+        - Performs linear crossover between genes of two parents
     - **OrderBasedCrossover (OBC)**
-        - 한 부모로부터 선택된 위치의 유전자 순서를 다른 부모에 적용하여 순서 충돌 없이 자손을 생성
+        - Creates offspring by applying the gene order of one parent to another without order conflicts
     - **PositionBasedCrossover**
-        - 랜덤으로 선택된 위치의 유전자로 두 부모에서 유전자를 교환하여 자손을 생성
+        - Randomly selects gene positions and exchanges genes between two parents to create offspring
     - **CycleCrossover (CX)**
-        - 부모 간의 순환 구조를 이용해 순환되는 위치에 따라 유전자를 교환
+        - Uses cyclical structure between parents to exchange genes at cyclical positions
     - **SubstringExchangeCrossover (SXX)**
-        - 일반 literal string Encodings에 대한 two cut-points crossover의 종류
+        - A type of two-cut-points crossover for general literal string encodings
     - **PartialScheduleExchangeCrossover (PSX)**
-        - 부분 일정을 블록으로 간주하여 교환
+        - Considers partial schedules as blocks for exchange
 
-<br>
-
-#### 2.3 Mutation
-- Mutation 구현 종류
+#### Mutation
+- Types of Mutation
     - **DisplacementMutation**
-        - 무작위로 부분 문자열을 선택하고 그것을 무작위 위치에 삽입
+        - Selects a random substring and inserts it at a random position
     - **InsertionMutation**
-        - 무작위로 유전자 하나를 선택하고 그것을 무작위 위치에 삽입
+        - Selects a random gene and inserts it at a random position
     - **ReciprocalExchangeMutation**
-        - 무작위로 두 위치를 선택한 후 이 위치에 있는 유전자들을 교환
+        - Selects two random positions and exchanges the genes at these positions
     - **ShiftMutation**
-        - 무작위로 유전자 하나를 선택하고 그것을 무작위 위치로 이동
+        - Selects a random gene and moves it to a random position
     - **InversionMutation**
-        - chromosome 내에서 무작위로 두 위치를 선택하고 이 두 위치 사이의 부분 문자열을 반전
+        - Selects two random positions within the chromosome and inverts the substring between these positions
     - **SwapMutation**
-        - 무작위로 두 위치를 선택하고 이 위치의 유전자들을 교환
+        - Selects two random positions and exchanges the genes at these positions
     - **GeneralMutation**
-        - 해당 유전자 위치를 선택된 다른 유전자와 교환
+        - Selects a gene and exchanges it with another randomly chosen gene
 
-<br>
-
-#### 2.4 Selection
-- Selection 구현 종류
+#### Selection
+- Types of Selection
     - **TournamentSelection**
-        - 무작위로 선택된 개체 집합에서 토너먼트를 통해 가장 우수한 개체를 선택
+        - Selects the best individual from a randomly chosen subset of individuals through a tournament
     - **SeedSelection**
-        - 한 부모는 우수한 개체, 다른 부모는 랜덤으로 선택한 개체 선택
+        - Selects one parent as the best individual and the other parent randomly
     - **RouletteSelection**
-        - 적합도 비례 방식으로 개체를 선택, 적합도가 높은 개체가 선택될 확률이 높아짐
+        - Selects individuals proportionally to their fitness, giving higher probability to individuals with better fitness
 
-<br>
 
-#### 2.5 Selective Mutation
-- 적합도(또는 성능)에 따라 개체를 두 그룹으로 나눔 (상위/하위)
-- 각 그룹에 서로 다른 돌연변이 확률을 적용하여 지역 최적해를 방지
+#### Selective Mutation
+- Divides individuals into two groups based on fitness (upper/lower)
+- Applies different mutation probabilities to each group to avoid local optima
     - **pm_high**
-        - 높은 돌연변이 확률 (낮은 순위의 개체에 적용)
+        - High mutation probability (applied to lower-ranking individuals)
     - **pm_low**
-        - 낮은 돌연변이 확률 (높은 순위의 개체에 적용)
+        - Low mutation probability (applied to higher-ranking individuals)
     - **rank_divide**
-        - 개체군을 성능에 따라 두 그룹으로 나누는 기준
+        - Criterion for dividing the population into two groups based on performance
 
-<br>
-
-#### 2.6 Fitness
-- Selection에 사용
-- Target makespan을 이용하여 fitness 함수 사용
+#### Fitness
+- Used in Selection
+- Uses target makespan for fitness function
     - $Fitness = \frac{1}{\frac{Makespan}{Targetmakespan}}$
-- Population에서 scaling method 구현
+- Implements scaling methods in the population
     - **min-max**
     - **rank**
     - **sigma**
     - **boltzmann**
 
-<br>
-
-#### 2.7 Target Makespan
-- Target makespan에 도달하면 해당 GA 종료
+#### Target Makespan
+- The GA terminates when the target makespan is reached
 
 <br>
 
 ### 3️⃣ Elitism
-- 엘리트 개체 보장
-    - 최악의 개체를 대체
-    - Random 대체
+- Ensures elite individuals
+    - Replaces the worst individual
+    - Random replacement
 
 <br>
 
 ### 4️⃣ Hybrid
-#### 4.1 Local Search
-- 특정 주기마다 Local Search 이벤트 발생
-- 리스트로 들고와서 순차적으로 진행, None 가능
+#### Local Search
+- Local search events occur at specific intervals
+- Carried out sequentially from a list, can be None
     - **HillClimbing**
-        - 현재 해에서 이웃으로 이동하면서 더 나은 해를 찾음
+        - Searches for a better solution by moving to neighboring solutions from the current solution
     - **TabuSearch**
-        - 탐색 과정에서 이전에 방문한 해를 금지하여 지역 최적해 방지
+        - Prevents local optima by prohibiting previously visited solutions during the search
     - **SimulatedAnnealing**
-        - 초기 온도에서 시작하여 서서히 온도를 낮추면서 해를 탐색
+        - Starts with an initial temperature and gradually lowers the temperature while searching for a solution
     - **GifflerThompson**
-        - Giffler-Thompson 우선순위 규칙을 사용하여 makespan과 fitness를 비교
+        - Compares makespan and fitness using Giffler-Thompson priority rules
 
-#### 4.2 PSO (Particle Swarm Optimization)
-- 모든 generation 완료 후 PSO 진행
-    - 입자라고 불리는 후보 Solution 집단을 갖고, 검색 공간에서 입자를 이동시켜 최적화
+#### PSO (Particle Swarm Optimization)
+- Executes PSO after all generations are completed
+    - Moves particles, which are candidate solutions, within the search space for optimization
 
 <br>
 
 ### 5️⃣ Island Migration
-- 각 Population은 독립적으로 evolution 진행
-- 특정 주기마다 migration 이벤트 발생, 각 섬마다 해를 교환
+- Each population evolves independently
+- Migration events occur at specific intervals, exchanging solutions among islands
     - **Independent**
-        - 각 Population은 독립적으로 evolution 계속 진행
+        - Each population continues to evolve independently
     - **Sequential Migration**
-        - A섬의 상위 10%가 B섬의 하위 90%와 교환
+        - Top 10% of island A exchanges with the bottom 90% of island B
     - **Random Migration**
-        - A섬의 상위 10%가 랜덤한 섬의 하위 90%와 교환
+        - Top 10% of island A exchanges with the bottom 90% of a random island
 
----
 
-## 🗂 성능 테스트
 
-### 벤치마킹 문제에 대한 성능 테스트
-- la 데이터셋 & Ta 데이터셋 & abz5 데이터셋
-    - JSSP에 대한 대표적인 벤치마킹 데이터셋
-    - 비교 알고리즘
+## 🧪 Performance Testing
+
+### Performance Testing on Benchmark Problems
+- la dataset & Ta dataset & abz5 dataset
+    - Representative benchmark datasets for JSSP
+    - Comparison algorithms
         - **DDQN**
-            - 두 개의 Q-네트워크 사용
+            - Uses two Q-networks
         - **ACRL35**
-            - Actor-critic deep reinforcement
+            - Actor-critic deep reinforcement learning
         - **ML-CNN**
             - Multilevel CNN and Iterative Local Search
         - **ILS**
             - Only Iterative Local Search
 
-### 성능 비교 결과
+### Performance Comparison Results
 
 | Problem     | Optimal | DDQN | ML-CNN | ILS  | Non-Local | Proposed |
 |-------------|---------|------|--------|------|-----------|----------|
@@ -194,50 +180,91 @@
 | La06 (15x5) | 926     | 926  | 926    | 926  | -         | 926      |
 | La07 (15x5) | 890     | 890  | 890    | 890  | -         | 890      |
 | Score       | -       | 6    | 6      | 5    | -         | 7        |
-| TA21 (20x20)| 1642    | -    | -      | -    | 1952      | 진행중    |
-| TA22 (20x20)| 1561    | -    | -      | -    | 1958      | 진행예정 |
-| TA31 (30x15)| 1764    | -    | -      | -    | 2112      | 진행예정 |
+| TA21 (20x20)| 1642    | -    | -      | -    | 1952      | In progress |
+| TA22 (20x20)| 1561    | -    | -      | -    | 1958      | Planned    |
+| TA31 (30x15)| 1764    | -    | -      | -    | 2112      | Planned    |
 | Abz5 (10x10)| 1234    | -    | -      | -    | 1338      | 1276     |
 
-<br>
-
-## 📂 파일 설명
-
-### GAS 폴더
-1. **run.py**: 실행 파일
-2. **GA.py**: GAEngine 클래스에 관한 파일
-3. **Individual.py**: Individual 클래스에 관한 파일
-4. **Population.py**: Population 클래스에 관한 파일
-
-### environment 폴더, Config 폴더, postprocessing 폴더
-1. **environment 폴더 내 파일**: simpy 환경 설정
-2. **Config 폴더 파일 내 RunConfig.py**: Run_Config 클래스 파일
-3. **postprocessing 폴더 내 파일**: generate_machine_log 함수 파일
-
-### visualization 폴더
-1. **GUI.py**: GUI 파일
-2. **Gantt.py**: Gantt 파일
-
-### result 폴더
-- **result_Gantt 폴더**: 종료 후 Gantt 차트 png 파일 생성
-- **result_txt 폴더**: run.py 실행 후 machine 및 전체 csv 생성
-
-### Data 폴더
-- 해당 폴더 내의 파일로 사용 가능
 
 <br>
 
-## 🏃 실행 방법
-1. GAS 폴더로 이동
-2. Run.py 내부 하이퍼 파라미터 조정
-    - **TARGET_MAKESPAN**: 목표 Makespan
-    - **MIGRATION_FREQUENCY**: 이주 간격
-    - **random_seed**: 랜덤 시드
-    - main 함수 내 **file = 'filename.txt'** 수정
-    - **Run_Config(n_job=50, n_machine=20, n_op=1000, population_size=1000, generations=100)** 수정: 데이터의 job, machine, operation 갯수 수정 및 원하는 population size 및 generation 조정
-    - **custom_settings** 내 원하는 GA 갯수로 만들기 및 내부 Crossover, Mutation, Selection, local_search, PSO, selective_mutation 및 확률 조정
-    - **local_search_frequency**: local_search 간격
-    - **selective_mutation_frequency**: 선택 mutation 간격
-3. 파라미터 조정 후 `python run.py`로 실행
-4. 실행 후 Random, MIO, heuristic으로 population 초기화 방법 선택
-5. Migration 방법 선택 (독립, 순차, 랜덤)
+## 📂 File Descriptions
+```bash
+📂 2024_JSSP_GA
+├── 📄 Readme.md
+├── 📂 Config
+├── 📂 Data
+├── 📂 docs
+├── 📂 environment
+├── 📂 GAS
+│   ├── 📄 run.py
+│   ├── 📂 Crossover
+│   ├── 📂 Local_Search
+│   ├── 📂 Meta
+│   ├── 📂 Mutation
+│   ├── 📂 Selection
+├── 📂 MachineInputOrder
+├── 📂 postprocessing
+├── 📂 result
+│   ├── 📂 ga_generations
+│   ├── 📂 result_Gantt
+│   ├── 📂 result_txt
+├── 📂 visualization
+```
+### GAS Folder
+1. **run.py**: Execution file
+2. **GA.py**: File related to GAEngine class
+3. **Individual.py**: File related to Individual class
+4. **Population.py**: File related to Population class
+5. **Crossover folder**: Contains files related to crossover methods.
+6. **Local_Search folder**: Contains files related to local search algorithms.
+7. **Meta folder**: Contains meta-heuristic related files.
+8. **Mutation folder**: Contains files related to mutation methods.
+9. **Selection folder**: Contains files related to selection methods.
+
+### environment Folder
+1. **Files in environment folder**: simpy environment settings
+
+### Config Folder
+1. **RunConfig.py in Config folder**: File for Run_Config class
+
+### postprocessing Folder
+1. **Files in postprocessing folder**: File for generate_machine_log function
+
+### visualization Folder
+1. **GUI.py**: GUI file
+2. **Gantt.py**: Gantt file
+
+### result Folder
+- **ga_generations folder**: Stores generation data from GA runs
+- **result_Gantt folder**: Generates Gantt chart png files after completion
+- **result_txt folder**: Generates machine and overall csv files after running run.py
+
+### Data Folder
+- Files in this folder can be used
+
+### docs Folder
+- Contains documentation and related images
+
+### MachineInputOrder Folder
+- Contains files related to Distance and Correlation Functions
+
+<br>
+
+## 🏃 How to Run
+1. Move to the GAS folder
+2. Adjust hyperparameters in Run.py
+    - **TARGET_MAKESPAN**: Target Makespan
+    - **MIGRATION_FREQUENCY**: Migration frequency
+    - **random_seed**: Random seed
+    - Modify **file = 'filename.txt'** in the main function
+    - Adjust this function
+        - **Run_Config(n_job=, n_machine=, n_op=, population_size=, generations=)**
+        - Adjust the number of jobs, machines, and operations in the data, as well as the desired population size and number of generations
+    - Create the desired number of GA in **custom_settings** (crossover, mutation, selection, local_search, PSO, selective_mutation and probabilities)
+    - **local_search_frequency**: Local search frequency
+    - **selective_mutation_frequency**: Selective mutation frequency
+3. Execute with `python run.py` after adjusting parameters
+4. Choose population initialization method: Random, MIO, heuristic
+5. Choose migration method (Independent, Sequential, Random)
+
