@@ -52,10 +52,10 @@ def calculate_bottleneck_index(dataset):
     return I_b
 
 
-if __name__ == "__main__":
-    from Dataset.Dataset import Dataset
-
-    d = Dataset('ft06.txt')
-    I_b = calculate_bottleneck_index(d)
-    I_f = calculate_flowshop_index(d)
-    print()
+# if __name__ == "__main__":
+#     from Dataset.Dataset import Dataset
+#
+#     d = Dataset('ft06.txt')
+#     I_b = calculate_bottleneck_index(d)
+#     I_f = calculate_flowshop_index(d)
+#     print()

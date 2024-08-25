@@ -1,8 +1,6 @@
 import os
 import pandas as pd
 import sys
-from GA_pyGAD.GA import Individual
-# class Solution():
 
 class Dataset:
     def __init__(self):
