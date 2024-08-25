@@ -18,10 +18,13 @@ Attributes:
 """
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
-from GAS.Individual import Individual  
+from GAS.Individual import Individual
+
+
 # class Solution():
 
 class Dataset:
@@ -31,9 +34,9 @@ class Dataset:
 
         Parameters:
             filename (str): The name of the dataset file.
-        """        
+        """
         self.name, _ = os.path.splitext(filename)
-        self.path = 'Data\\Dataset\\'        
+        self.path = 'Data\\Dataset\\'
         if __name__ == "__main__":
             file_path = os.path.join(os.getcwd(), filename)
         else:
@@ -48,13 +51,24 @@ class Dataset:
 
         # Initialize operation data list
         self.op_data = []
+
+        # division of machine data and processing time data
+        self.machine_data = []
+        self.pt_data = []
         data = pd.read_csv(file_path, sep="\t", engine='python', encoding="cp949", skiprows=[0], header=None)
 
         # Parse the operation data from the file
         for i in range(self.n_job):
             self.op_data.append([])
+            self.machine_data.append([])
+            self.pt_data.append([])
             for j in range(self.n_machine):
                 self.op_data[i].append((data.iloc[self.n_job + i, j] - 1, data.iloc[i, j]))
+                self.machine_data[i].append(data.iloc[self.n_job + i, j] - 1)
+                self.pt_data[i].append(data.iloc[i, j])
+        self.n_solution = 0  # Initialize the number of solutions to 0
 
-        self.n_solution = 0 # Initialize the number of solutions to 0
 
+if __name__ == "__main__":
+    d = Dataset('abz5.txt')
+    print()
