@@ -2,13 +2,13 @@ import copy
 import math
 import random
 
-class SimulatedAnnealing:
-    def __init__(self, initial_temp=1000, cooling_rate=0.95, min_temp=1, min_swap_ratio=0.05, max_swap_ratio=0.5):
+class SimulatedAnnealing_insert:
+    def __init__(self, initial_temp=1000, cooling_rate=0.95, min_temp=1, min_insert_ratio=0.05, max_insert_ratio=0.5):
         self.initial_temp = initial_temp
         self.cooling_rate = cooling_rate
         self.min_temp = min_temp
-        self.min_swap_ratio = min_swap_ratio  # 최소 교환 비율
-        self.max_swap_ratio = max_swap_ratio  # 최대 교환 비율
+        self.min_insert_ratio = min_insert_ratio  # 최소 삽입 비율
+        self.max_insert_ratio = max_insert_ratio  # 최대 삽입 비율
         self.stop_search = False
 
     def optimize(self, individual, config):
@@ -49,14 +49,15 @@ class SimulatedAnnealing:
         new_seq = copy.deepcopy(individual.seq)
         size = len(new_seq)
 
-        # 염색체 길이에 대한 상대적 비율로 교환 횟수 결정
-        min_swaps = max(1, int(size * self.min_swap_ratio))
-        max_swaps = min(size, int(size * self.max_swap_ratio))
-        num_swaps = random.randint(min_swaps, max_swaps)
+        # 염색체 길이에 대한 상대적 비율로 삽입 횟수 결정
+        min_inserts = max(1, int(size * self.min_insert_ratio))
+        max_inserts = min(size, int(size * self.max_insert_ratio))
+        num_inserts = random.randint(min_inserts, max_inserts)
 
-        for _ in range(num_swaps):
+        for _ in range(num_inserts):
             i, j = random.sample(range(size), 2)
-            new_seq[i], new_seq[j] = new_seq[j], new_seq[i]
+            job = new_seq.pop(i)
+            new_seq.insert(j, job)
         
         neighbor = self.create_new_individual(individual, new_seq, config)  # config 전달
         return neighbor

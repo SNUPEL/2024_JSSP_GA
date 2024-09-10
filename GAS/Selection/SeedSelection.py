@@ -1,55 +1,24 @@
-"""
-SeedSelection Class
-
-This script defines the SeedSelection class, which implements a custom selection 
-method for genetic algorithms. The selection method chooses the most fit individual 
-(male) with a probability k and a random individual (female) otherwise.
-
-Classes:
-    SeedSelection: A class to perform seed selection on a population.
-
-Functions:
-    select(population): Selects an individual from the population based on the seed selection method.
-"""
-
 import random
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from GAS.Individual import Individual
+import copy
 
 class SeedSelection:
-    """
-    Implements a custom seed selection method for genetic algorithms.
-    
-    Attributes:
-        k (float): The probability of selecting the most fit individual.
-    """
-    
-    def __init__(self, k=0.75):
-        """
-        Initializes the SeedSelection class with the specified probability.
-        
-        Parameters:
-            k (float): The probability of selecting the most fit individual (default is 0.75).
-        """
-        self.k = k  # 확률값 k 설정
+    def __init__(self):
+        pass
 
     def select(self, population):
-        """
-        Selects an individual from the population based on the seed selection method.
-        
-        Parameters:
-            population (list): The population to select from.
-        
-        Returns:
-            Individual: The selected individual.
-        """
-        # male: 가장 적합한 염색체
-        male = max(population, key=lambda ind: ind.fitness)
-        # female: 랜덤하게 선택
-        female = random.choice(population)
-        # 확률 k에 따라 male 또는 female 선택
-        selected = male if random.random() < self.k else female
-        return selected
+        # population을 makespan을 기준으로 정렬 (makespan이 작을수록 좋음)
+        sorted_population = sorted(population, key=lambda ind: ind.makespan)
+
+        # 가장 좋은 개체를 best_individual로 선택
+        best_individual = sorted_population[0]
+
+        # 확률적으로 best_individual 또는 다른 개체 선택
+        if random.random() < 0.5:  # 50% 확률로 best_individual 선택
+            return copy.deepcopy(best_individual)
+        else:
+            # 나머지 50% 확률로 다른 개체 무작위 선택
+            other_individuals = sorted_population[1:]
+            if other_individuals:
+                return copy.deepcopy(random.choice(other_individuals))
+            else:
+                return copy.deepcopy(best_individual)

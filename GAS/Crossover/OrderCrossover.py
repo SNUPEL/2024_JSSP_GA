@@ -1,75 +1,44 @@
-"""
-Order Crossover (OX) Class
-
-This script defines the OrderCrossover class, which implements the order 
-crossover method for genetic algorithms. The order crossover method creates 
-offspring by taking a subsequence from one parent and preserving the order of 
-the remaining elements from the other parent.
-
-Classes:
-    OrderCrossover: A class to perform order crossover on two parent individuals.
-
-Functions:
-    cross(parent1, parent2): Performs the order crossover operation on two parents.
-"""
-
-import sys
-import os
 import random
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import copy
 
-from GAS.Crossover.base import Crossover
-from GAS.Individual import Individual
-
-# Order Crossover
-class OrderCrossover(Crossover):
-    """
-    Implements the order crossover (OX) method for genetic algorithms.
-    
-    Attributes:
-        pc (float): The probability of crossover.
-    """
-    
-    def __init__(self, pc):
-        """
-        Initializes the OrderCrossover class with the specified crossover probability.
-        
-        Parameters:
-            pc (float): The probability of crossover.
-        """
+class OrderCrossover:
+    def __init__(self, pc, min_crossover_size=0.1, max_crossover_size=0.3):
         self.pc = pc
+        self.min_crossover_size = min_crossover_size
+        self.max_crossover_size = max_crossover_size
 
     def cross(self, parent1, parent2):
-        """
-        Performs the order crossover operation on two parents.
-        
-        Parameters:
-            parent1 (Individual): The first parent individual.
-            parent2 (Individual): The second parent individual.
-        
-        Returns:
-            tuple: Two offspring individuals resulting from the crossover.
-        """
+        # print(f"Starting crossover between:\nParent1: {parent1.seq}\nParent2: {parent2.seq}")
         if random.random() > self.pc:
-            return parent1, parent2
+            print("Crossover did not occur, parents copied directly.")
+            return copy.deepcopy(parent1), copy.deepcopy(parent2)
 
-        point1, point2 = sorted(random.sample(range(len(parent1.seq)), 2))
-        child1, child2 = parent1.seq[:], parent2.seq[:]
+        size = len(parent1.seq)
+        crossover_size = random.uniform(self.min_crossover_size, self.max_crossover_size)
+        crossover_length = int(size * crossover_size)
+        
+        start = random.randint(0, size - crossover_length)
+        end = start + crossover_length
 
-        # Create proto-children by inserting the selected substring into the corresponding positions
-        child1[point1:point2], child2[point1:point2] = parent1.seq[point1:point2], parent2.seq[point1:point2]
+        def create_child(p1, p2):
+            child_seq = [None] * size
+            child_seq[start:end] = p1.seq[start:end]
+            
+            remaining = [item for item in p2.seq if item not in child_seq[start:end]]
+            for i in list(range(0, start)) + list(range(end, size)):
+                child_seq[i] = remaining.pop(0)
 
-        # Remove the selected substring symbols from the other parent
-        temp1 = [item for item in parent2.seq if item not in parent1.seq[point1:point2]]
-        temp2 = [item for item in parent1.seq if item not in parent2.seq[point1:point2]]
+            child = copy.deepcopy(p1)
+            child.seq = child_seq
+            return child
 
-        # Fill unfixed positions
-        idx1, idx2 = 0, 0
-        for i in range(len(child1)):
-            if not (point1 <= i < point2):
-                child1[i] = temp1[idx1]
-                idx1 += 1
-                child2[i] = temp2[idx2]
-                idx2 += 1
+        child1 = create_child(parent1, parent2)
+        child2 = create_child(parent2, parent1)
 
-        return Individual(config=parent1.config, seq=child1, op_data=parent1.op_data), Individual(config=parent1.config, seq=child2, op_data=parent1.op_data)
+        # Validation and Debugging Output
+        # print(f"Parent1: {parent1.seq}")
+        # print(f"Parent2: {parent2.seq}")
+        # print(f"Child1: {child1.seq}")
+        # print(f"Child2: {child2.seq}")
+
+        return child1, child2

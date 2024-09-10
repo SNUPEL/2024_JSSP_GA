@@ -450,37 +450,53 @@ class Population:
             individual.scaled_fitness = exp_values[self.individuals.index(individual)] / sum_exp_values
 
     def select(self, selection):
-        """
-        Selects individuals from the population using the specified selection method.
+        # 선택 과정 시작 출력
+        # print("Selection results:")
         
-        Parameters:
-            selection: Selection method to use.
-        """
-        self.individuals = [selection.select(self.individuals) for _ in range(self.config.population_size)]
+        new_individuals = []
+        
+        # population size만큼 개별 개체를 선택하고 리스트에 추가
+        for _ in range(self.config.population_size):
+            selected = selection.select(self.individuals)
+            new_individuals.append(copy.deepcopy(selected))
+            
+            # 선택된 개체 출력
+            # print(f"  Selected individual: Seq: {selected.seq}, Makespan: {selected.makespan}")
+        
+        # 최종적으로 새로운 개체 리스트로 population을 대체
+        self.individuals = new_individuals
+
 
     def crossover(self, crossover):
-        """
-        Applies crossover to the population.
-        
-        Parameters:
-            crossover: Crossover method to use.
-        """
+        # print("Crossover results:")
         next_generation = []
-        for i in range(0, len(self.individuals), 2):
-            parent1, parent2 = self.individuals[i], self.individuals[i + 1]
-            child1, child2 = crossover.cross(parent1, parent2)
-            next_generation.extend([child1, child2])
+
+        # 부모 리스트를 그대로 사용하여 짝짓기
+        parents = self.individuals  # 선택된 부모들이 이미 올바른 순서로 정렬되어 있음
+
+        for i in range(0, len(parents), 2):
+            if i + 1 < len(parents):
+                parent1, parent2 = parents[i], parents[i + 1]
+                # print(f"Starting crossover between:")
+                # print(f"Parent1: {parent1.seq}")
+                # print(f"Parent2: {parent2.seq}")
+                child1, child2 = crossover.cross(parent1, parent2)
+                next_generation.extend([child1, child2])
+                # print(f"Child1 sequence after crossover: {child1.seq}")
+                # print(f"Child2 sequence after crossover: {child2.seq}")
+
         self.individuals = next_generation
 
+
     def mutate(self, mutation):
-        """
-        Applies mutation to the population.
-        
-        Parameters:
-            mutation: Mutation method to use.
-        """
-        for individual in self.individuals:
+        # print("Mutation results:")
+        for i, individual in enumerate(self.individuals):
+            original_seq = copy.deepcopy(individual.seq)
             mutation.mutate(individual)
+            # if original_seq != individual.seq:
+            #     print(f"  Mutation on individual {i}:")
+            #     print(f"    Before: {original_seq}")
+            #     print(f"    After:  {individual.seq}")
 
     def preserve_elites(self, elites):
         """
