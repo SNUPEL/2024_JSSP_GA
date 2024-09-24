@@ -31,6 +31,7 @@ from GAS.Crossover.SXX import SXX
 from GAS.Crossover.PSX import PSXCrossover
 from GAS.Crossover.OrderCrossover import OrderCrossover
 from GAS.Crossover.POXCrossover import POXCrossover
+from GAS.Crossover.CompositeCrossover import CompositeCrossover
 
 # Mutation
 from GAS.Mutation.GeneralMutation import GeneralMutation
@@ -40,6 +41,7 @@ from GAS.Mutation.ReciprocalExchangeMutation import ReciprocalExchangeMutation
 from GAS.Mutation.ShiftMutation import ShiftMutation
 from GAS.Mutation.InversionMutation import InversionMutation
 from GAS.Mutation.SwapMutation import SwapMutation
+from GAS.Mutation.CompositeMutation import CompositeMutation
 
 # Selection
 from GAS.Selection.RouletteSelection import RouletteSelection
@@ -51,6 +53,9 @@ from Local_Search.HillClimbing import HillClimbing
 from Local_Search.TabuSearch import TabuSearch
 from Local_Search.SimulatedAnnealing import SimulatedAnnealing
 from Local_Search.GifflerThompson_LS import GifflerThompson_LS
+from Local_Search.TwoOptLocalSearch import TwoOptLocalSearch
+from Local_Search.SimulatedAnnealing_insert import SimulatedAnnealing_insert
+from Local_Search.TwoOptLocalSearch_insert import TwoOptLocalSearch_insert
 
 # Meta Heuristic
 from Meta.PSO import PSO  # pso를 추가합니다
@@ -90,32 +95,23 @@ ft20 = 1165
 '''
 
 # Configuration for target makespan and migration frequency
-TARGET_MAKESPAN = 1642  # 목표 Makespan
-MIGRATION_FREQUENCY = 300  # Migration frequency 설정
+TARGET_MAKESPAN = 666  # 목표 Makespan
+MIGRATION_FREQUENCY = 5  # Migration frequency 설정
 random_seed = 42  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
 
 
 
 def run_ga_engine(args):
-    """
-    Runs the GA engine for a given configuration.
-
-    Parameters:
-        args (tuple): Contains the GA engine, index, paths, sync variables, and events.
-
-    Returns:
-        tuple: Contains the best individual, crossover, mutation, generations, execution time, and best time.
-    """    
-    ga_engine, index, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events = args
+    ga_engine, index, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events, new_populations = args
     try:
-        best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, events)
+        # evolve 함수 호출 시 new_populations 전달
+        best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, new_populations, events)
         
         # GA 엔진 상태 출력
         print(f"GA{index+1} 상태:")
         print(f"Population: {ga_engine.population is not None}")
         print(f"Best Individual: {best is not None}")
         print(f"Current Generation: {sync_generation[index]}")
-        
         if best is None:
             return None
 
@@ -144,8 +140,11 @@ def run_ga_engine(args):
 
         return best, best_crossover, best_mutation, all_generations, execution_time, best_time, index
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # 트레이스백 출력
         print(f"Exception in GA {index+1}: {e}")
         return None
+
 
 
 def main():
@@ -157,16 +156,16 @@ def main():
     island_mode = int(input("Select Island-Parallel GA mode (1: Independent, 2: Sequential Migration, 3: Random Migration): "))
     print(f"Selected Island-Parallel GA mode: {island_mode}")
 
-    file = 'ta21.txt'
+    file = 'la01.txt'
     print(f"Loading dataset from {file}...")  # 디버그 출력 추가
     dataset = Dataset(file)
 
     # Custom GA settings    
-    base_config = Run_Config(n_job=20, n_machine=20, n_op=400, population_size=10, generations=100, 
+    base_config = Run_Config(n_job=10, n_machine=5, n_op=50, population_size=100, generations=400, 
                              print_console=False, save_log=True, save_machinelog=True, 
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
-                             tabu_search_iterations=10, hill_climbing_iterations=30, simulated_annealing_iterations=50)
+                             tabu_search_iterations=10, hill_climbing_iterations=30, simulated_annealing_iterations=50,two_iterations=1000)
     
     print("Base config created...")  # 디버그 출력 추가
 
@@ -193,7 +192,7 @@ def main():
     '''
     crossovers
     [OrderCrossover, PMXCrossover, LOXCrossover, OBC, 
-    PositionBasedCrossover, SXX,PSXCrossover,POXCrossover]  # Crossover 리스트
+    PositionBasedCrossover, SXX,PSXCrossover,POXCrossover,CXCrossover,CX_RandomCrossover,CompositeCrossover]  # Crossover 리스트
     '''
 
     '''
@@ -209,7 +208,7 @@ def main():
 
     '''
     Local Search
-    [HillClimbing(), TabuSearch(), SimulatedAnnealing(), GifflerThompson()] # Local Search 리스트
+    [HillClimbing(), TabuSearch(), SimulatedAnnealing(), GifflerThompson(),TwoOptLocalSearch(),SimulatedAnnealing_insert()] # Local Search 리스트
     GifflerThompson(priority_rule='SPT') -> SPT, LPT, MWR, LWR, MOR, LOR, EDD, FCFS, RANDOM
     '''
 
@@ -219,9 +218,8 @@ def main():
     '''
 
     custom_settings = [
-        # {'crossover': POXCrossover, 'pc': 0.7, 'mutation': IntelligentMutation, 'pm': 0.05, 'selection': TruncationSelection(),'elite_TS': 0.2, 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.5, pm_low=0.01, rank_divide=0.4)},
-        {'crossover': OrderCrossover, 'pc': 0.8, 'mutation': InsertionMutation, 'pm': 0.1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        {'crossover': OrderCrossover, 'pc': 0.8, 'mutation': InsertionMutation, 'pm': 0.1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.8, pm_low=0.1, rank_divide=0.05)},
+        # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
+        {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [SimulatedAnnealing_insert()], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
     ]
 
     ga_engines = []
@@ -252,16 +250,16 @@ def main():
         selection = selection_instance
         pso = pso_class if pso_class else None
         local_search = local_search_methods
-        local_search_frequency = 40
-        selective_mutation_frequency = 20
+        local_search_frequency = 1
+        selective_mutation_frequency = 1000
         selective_mutation = selective_mutation_instance
 
         if initialization_mode == '1':
-            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.05, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
+            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
         elif initialization_mode == '2':
-            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.05, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='2', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
+            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='2', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
         elif initialization_mode == '3':
-            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.05, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='3', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
+            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='3', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
         
         ga_engines.append(ga_engine)
 
@@ -272,6 +270,8 @@ def main():
     elite_population = Manager().list([None] * len(ga_engines))
 
     manager = Manager()
+    new_populations = manager.list([[] for _ in range(len(ga_engines))])  # Manager를 통한 공유 리스트
+
     sync_generation = manager.list([0] * len(ga_engines))
     sync_lock = manager.Lock()
 
@@ -281,10 +281,10 @@ def main():
     with Pool() as pool:
         while True:
             if island_mode in ['2', '3']:
-                args = [(ga_engines[i], i, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events) for i in range(len(ga_engines))]
+                args = [(ga_engines[i], i, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events, new_populations) for i in range(len(ga_engines))]
             else:
-                args = [(ga_engines[i], i, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, None) for i in range(len(ga_engines))]
-            
+                args = [(ga_engines[i], i, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, None, new_populations) for i in range(len(ga_engines))]
+
             results = pool.map(run_ga_engine, args)
 
             all_completed = True
@@ -293,6 +293,15 @@ def main():
                     best, best_crossover, best_mutation, all_generations, execution_time, best_time, index = result
                     best_individuals[index] = (best, best_crossover, best_mutation, execution_time, best_time, all_generations)
                     elite_population[index] = best
+
+                    # 세대가 끝날 때마다 상위 10% 개체를 new_populations에 저장
+                    top_individuals = sorted(ga_engines[index].population.individuals, key=lambda ind: ind.makespan)[:max(1, len(ga_engines[index].population.individuals) // 10)]
+                    new_populations[index] = [copy.deepcopy(ind) for ind in top_individuals]
+
+                    # 추가: new_populations이 제대로 저장되고 있는지 확인하기 위해 로그 출력
+                    # print(f"GA{index+1} 세대 {sync_generation[index]}의 상위 10% 개체: {[ind.seq for ind in new_populations[index]]}")
+
+
                     crossover_name = best_crossover.__class__.__name__
                     mutation_name = best_mutation.__class__.__name__
                     selection_name = ga_engines[index].selection.__class__.__name__

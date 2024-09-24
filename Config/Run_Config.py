@@ -36,6 +36,7 @@ class Run_Config:
                  show_gui=False,
                  trace_object='Process4', title=None,
                  tabu_search_iterations=100, hill_climbing_iterations=100, simulated_annealing_iterations=100,
+                 two_iterations = 100,
                  ga_index=0):
         """
         Initializes the Run_Config class with the specified parameters.
@@ -88,6 +89,7 @@ class Run_Config:
         self.tabu_search_iterations = tabu_search_iterations
         self.hill_climbing_iterations = hill_climbing_iterations
         self.simulated_annealing_iterations = simulated_annealing_iterations
+        self.two_iterations = two_iterations
 
         script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the directory of the current script
         folder_name = 'result'  # Define the folder name
