@@ -386,6 +386,7 @@ class Population:
         for individual in self.individuals:
             individual.makespan, individual.mio_score = individual.evaluate(individual.machine_order)
             individual.calculate_fitness(target_makespan)
+        self.individuals.sort(key=lambda x: x.fitness, reverse=True)
         # 스케일링 방법 선택 (Rank Scaling, Sigma Scaling, Boltzmann Scaling)
         scaling_method = 'min-max'  # 'min-max', 'sigma', 'boltzmann' 등을 사용할 수 있습니다.
 

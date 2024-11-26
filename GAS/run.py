@@ -96,8 +96,8 @@ ft20 = 1165
 
 # Configuration for target makespan and migration frequency
 TARGET_MAKESPAN = 666  # 목표 Makespan
-MIGRATION_FREQUENCY = 5  # Migration frequency 설정
-random_seed = 42  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
+MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
+random_seed = None  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
 
 
 
@@ -156,12 +156,12 @@ def main():
     island_mode = int(input("Select Island-Parallel GA mode (1: Independent, 2: Sequential Migration, 3: Random Migration): "))
     print(f"Selected Island-Parallel GA mode: {island_mode}")
 
-    file = 'la01.txt'
+    file = 'ta21.txt'
     print(f"Loading dataset from {file}...")  # 디버그 출력 추가
     dataset = Dataset(file)
 
     # Custom GA settings    
-    base_config = Run_Config(n_job=10, n_machine=5, n_op=50, population_size=100, generations=400, 
+    base_config = Run_Config(n_job=20, n_machine=20, n_op=400, population_size=100, generations=400, 
                              print_console=False, save_log=True, save_machinelog=True, 
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -219,7 +219,8 @@ def main():
 
     custom_settings = [
         # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [SimulatedAnnealing_insert()], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
+        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
+        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
     ]
 
     ga_engines = []

@@ -15,7 +15,7 @@ class SwapMutation:
 
     def mutate(self, individual):
         if random.random() < self.pm:
-            original_seq = copy.deepcopy(individual.seq)  # 원래 시퀀스를 깊은 복사하여 비교에 사용
+            # original_seq = copy.deepcopy(individual.seq)  # 원래 시퀀스를 깊은 복사하여 비교에 사용
             seq = individual.seq
             size = len(seq)
             num_jobs = individual.config.n_job  # Job 수 가져오기

@@ -192,18 +192,9 @@ class GAEngine:
 
                 self.population.mutate(self.mutation)
 
-                # 각 개체에 대해 필요한 업데이트 적용
-                for individual in self.population.individuals:
-                    individual.job_seq = individual.get_repeatable()  # job_seq 업데이트
-                    individual.feasible_seq = individual.get_feasible()  # feasible_seq 업데이트
-                    individual.machine_order = individual.get_machine_order()  # machine_order 재계산
-                    individual.makespan, _ = individual.evaluate(individual.machine_order)  # makespan 재계산
-                    
                 # 전체 population 출력
                 population_size = len(self.population.individuals)  # population의 갯수 계산
                 print(f"GA{index+1} - 전체 population After crossover (Total Population: {population_size}):")
-
-                self.population.evaluate(self.config.target_makespan)
 
                 # 엘리트 개체를 population에 다시 삽입
                 for elite in elites:
@@ -248,12 +239,6 @@ class GAEngine:
 
                     random_remaining = random.sample(remaining_indices_and_individuals, remaining_count)
 
-                    # # 선택된 상위 10%와 무작위 40%를 결합
-                    # selected_individuals = top_indices_and_individuals + random_remaining
-
-                    # top_individuals = [copy.deepcopy(individual) for idx, individual in selected_individuals]
-                    # top_indices = [idx for idx, individual in selected_individuals]
-
                     top_individuals = [copy.deepcopy(individual) for idx, individual in top_indices_and_individuals]
                     top_indices = [idx for idx, individual in top_indices_and_individuals]
 
@@ -285,17 +270,6 @@ class GAEngine:
 
                 # 이주가 가능한 경우
                 if self.island_mode != 1 and sync_generation[index] % self.migration_frequency == 0 and sync_generation[index] != 0 and self.ga_engines:
-                    # if events:
-                    #     for event in events:
-                    #         event.set()
-                    #     for event in events:
-                    #         event.wait()
-                    #     for event in events:
-                    #         event.clear()
-
-                    # print(f'island_mode{self.island_mode}')
-                    # print(f"GA{index+1}_Preparing for migration at generation {sync_generation[index]}")
-
                     # 이주 방식에 따른 순서 설정
                     if self.island_mode == 2:
                         # print(f"GA{index+1}_Migration 중 (순차) at generation {sync_generation[index]}")
@@ -332,9 +306,6 @@ class GAEngine:
                                     # machine_order는 이주 후 재계산
                                     migrated_individual.machine_order = migrated_individual.get_machine_order()
                                     
-                                    # 이동 전후 상태 출력
-                                    # print(f"Before Migration - GA{i+1}, Individual Seq: {self.ga_engines[i].population.individuals[random_index].seq}, Makespan: {self.ga_engines[i].population.individuals[random_index].makespan}")
-                                    # print(f"After Migration - GA{i+1}, Migrated Individual Seq: {migrated_individual.seq}, Makespan: {migrated_individual.makespan}")
 
                                     # 마이그레이션 완료 후 상태 확인
                                     self.ga_engines[i].population.individuals[random_index] = migrated_individual
@@ -344,10 +315,6 @@ class GAEngine:
                                 # 이주 후 population 평가
                                 self.ga_engines[i].population.evaluate(self.config.target_makespan)
 
-                                # 이주 후 상태 출력
-                                # print(f"이주 후 GA{i+1}의 population 상태:")
-                                # for ind in self.ga_engines[i].population.individuals:
-                                #     print(f"After evaluation: Seq: {ind.seq}, Makespan: {ind.makespan}")
 
                             else:
                                 print(f"new_populations[{target_index}] is empty, skipping migration.")
@@ -374,14 +341,6 @@ class GAEngine:
                 with sync_lock:
                     sync_generation[index] += 1
 
-            # # OR-Tools 적용
-            # if self.ortools_optimizer:
-            #     print(f"GA{index+1}_Applying OR-Tools after all generations")
-            #     for i in range(len(self.population.individuals)):
-            #         individual = self.population.individuals[i]
-            #         optimized_individual = self.apply_ORtools(individual)
-            #         self.population.individuals[i] = optimized_individual
-
             if self.pso:
                 print(f"GA{index+1}_Applying PSO after all generations")
                 for i in range(len(self.population.individuals)):
@@ -404,62 +363,3 @@ class GAEngine:
             #     print(f"Seq: {ind.seq}, Makespan: {ind.makespan}, Machine Order: {ind.machine_order}")
 
             return None, None, None, [], 0, None
-
-    def apply_local_search(self, individual):
-        """
-        Applies local search optimization to an individual.
-        
-        Parameters:
-            individual (Individual): The individual to optimize.
-        
-        Returns:
-            Individual: The optimized individual.
-        """
-        best_individual = copy.deepcopy(individual)
-        for method in self.local_search_methods:
-            improved_individual = method.optimize(best_individual, self.config)
-            if improved_individual.makespan < best_individual.makespan:
-                best_individual = improved_individual
-        return best_individual
-
-    def apply_pso(self, individual):
-        """
-        Applies PSO optimization to an individual.
-        
-        Parameters:
-            individual (Individual): The individual to optimize.
-        
-        Returns:
-            Individual: The optimized individual.
-        """
-        best_individual = copy.deepcopy(individual)
-        optimized_individual = self.pso.optimize(best_individual, self.config)
-        if optimized_individual.makespan < best_individual.makespan:
-            best_individual = optimized_individual
-        return best_individual
-
-    def save_csv(self, all_generations, execution_time, file_path):
-        """
-        Saves the GA generations data to a CSV file.
-        
-        Parameters:
-            all_generations (list): List of all generations data.
-            execution_time (float): Total execution time of the GA.
-            file_path (str): Path to the CSV file.
-        """
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        file_path_with_timestamp = file_path.replace('.csv', f'_{timestamp}.csv')
-
-        with open(file_path_with_timestamp, 'w', newline='') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(['Generation', 'Chromosome', 'Makespan'])
-            for generation, individuals in all_generations:
-                for seq, makespan in individuals:
-                    csvwriter.writerow([generation, seq, makespan])
-
-    def apply_ORtools(self, individual):
-        best_individual = copy.deepcopy(individual)
-        optimized_individual = self.ortools_optimizer.optimize(best_individual, self.config)
-        if optimized_individual.makespan < best_individual.makespan:
-            best_individual = optimized_individual
-        return best_individual

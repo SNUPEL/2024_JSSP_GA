@@ -142,7 +142,7 @@ class GAEngine:
         self.local_search_frequency = local_search_frequency
         self.selective_mutation_frequency = selective_mutation_frequency
         self.random_seed = random_seed
-        self.local_search_top_percentage = 0.01  
+        self.local_search_top_percentage = 0.02  
 
         if initialization_mode == '2':
             self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
@@ -172,15 +172,9 @@ class GAEngine:
             while sync_generation[index] < self.config.generations:
                 # print(f"GA{index+1}_Evaluating generation {sync_generation[index]}")
 
-
                 self.population.evaluate(self.config.target_makespan)
                 print(f"GA{index+1} Population: {self.population is not None}")
                 print(f"GA{index+1} Best Individual: {best_individual is not None}")
-
-
-                best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
-                best_fitness = best_individual.makespan
-                print(f"GA{index+1}_Best fitness at generation select crossover mutate 전 {sync_generation[index]}: {best_fitness}")
 
                 # 엘리트 개체 선택
                 num_elites = int(self.elite_ratio * len(self.population.individuals))
@@ -192,18 +186,9 @@ class GAEngine:
 
                 self.population.mutate(self.mutation)
 
-                # 각 개체에 대해 필요한 업데이트 적용
-                for individual in self.population.individuals:
-                    individual.job_seq = individual.get_repeatable()  # job_seq 업데이트
-                    individual.feasible_seq = individual.get_feasible()  # feasible_seq 업데이트
-                    individual.machine_order = individual.get_machine_order()  # machine_order 재계산
-                    individual.makespan, _ = individual.evaluate(individual.machine_order)  # makespan 재계산
-                    
                 # 전체 population 출력
                 population_size = len(self.population.individuals)  # population의 갯수 계산
                 print(f"GA{index+1} - 전체 population After crossover (Total Population: {population_size}):")
-
-                self.population.evaluate(self.config.target_makespan)
 
                 # 엘리트 개체를 population에 다시 삽입
                 for elite in elites:
@@ -211,65 +196,55 @@ class GAEngine:
                     worst_index = max(range(len(self.population.individuals)), key=lambda idx: self.population.individuals[idx].makespan)
                     # 엘리트 개체의 깊은 복사본을 생성하여 삽입
                     self.population.individuals[worst_index] = copy.deepcopy(elite)
-                    print(f"Inserted elite at index {worst_index} - Makespan: {elite.makespan}, Fitness: {elite.fitness}")
+                    # print(f"Inserted elite at index {worst_index} - Seq: {elite.seq}, Makespan: {elite.makespan}, Fitness: {elite.fitness}")
 
                 self.population.evaluate(self.config.target_makespan)
                 # best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
                 # best_fitness = best_individual.makespan
                  
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
-                best_fitness = best_individual.makespan
-                print(f"GA{index+1}_Best fitness at generation select crossover mutate 후 {sync_generation[index]}: {best_fitness}")
+                if best_individual:
+                    print(f"GA{index+1} Best Individual found: Seq: {best_individual.seq}, Makespan: {best_individual.makespan}")
+                else:
+                    print(f"GA{index+1} Best Individual not found.")
 
                 # 상위 10% 개체를 new_populations에 저장
                 self.update_new_populations(index, new_populations)
                 # print(new_populations)
 
+                # if sync_generation[index] > 0 and sync_generation[index] % self.local_search_frequency == 0:
                 if sync_generation[index] >= 1 and sync_generation[index] % self.local_search_frequency == 0:
                     print(f"GA{index+1}_Applying local search")
                     
-                    total_percentage = self.local_search_top_percentage  # 예를 들어, 0.5이면 50%
-                    top_percentage = 1 * total_percentage  # 상위 10%는 top_percentage에 해당
-
-                    # 상위 10% 개체 추출 (가장 우수한 개체들)
-                    top_count = int(len(self.population.individuals) * top_percentage)
-                    top_indices_and_individuals = sorted(
-                        enumerate(self.population.individuals),
-                        key=lambda ind: ind[1].makespan
-                    )[:top_count]
-
-                    # 나머지 개체들 중에서 무작위로 나머지 40% 선택
-                    remaining_count = int(len(self.population.individuals) * (total_percentage - top_percentage))
+                    # # 현재 population 출력
+                    # print(f"GA{index+1}_Current population:")
+                    # for ind in self.population.individuals:
+                    #     print(f"Seq: {ind.seq}, Makespan: {ind.makespan}, Fitness: {ind.fitness}")
                     
-                    remaining_indices_and_individuals = sorted(
-                        enumerate(self.population.individuals),
+                    # 상위 10% 개체 선택 및 출력
+                    # top_individuals = copy.deepcopy(sorted(self.population.individuals, key=lambda ind: ind.fitness, reverse=True)[:int(len(self.population.individuals) * self.local_search_top_percentage)])
+                    top_indices_and_individuals = sorted(
+                        enumerate(self.population.individuals), 
                         key=lambda ind: ind[1].makespan
-                    )[top_count:]  # 상위 10% 이후의 개체들
-
-                    random_remaining = random.sample(remaining_indices_and_individuals, remaining_count)
-
-                    # # 선택된 상위 10%와 무작위 40%를 결합
-                    # selected_individuals = top_indices_and_individuals + random_remaining
-
-                    # top_individuals = [copy.deepcopy(individual) for idx, individual in selected_individuals]
-                    # top_indices = [idx for idx, individual in selected_individuals]
+                    )[:int(len(self.population.individuals) * self.local_search_top_percentage)]
 
                     top_individuals = [copy.deepcopy(individual) for idx, individual in top_indices_and_individuals]
                     top_indices = [idx for idx, individual in top_indices_and_individuals]
+
+                    # top_indices 출력
+                    # print(f"GA{index+1}_Top indices of top individuals before local search:")
+                    # print(f"Top indices: {top_indices}")
+
+                    # print(f"GA{index+1}_Top individuals before local search:")
+                    # for ind in top_individuals:
+                    #     print(f"Seq: {ind.seq}, Makespan: {ind.makespan}, Fitness: {ind.fitness}")
 
                     for method in self.local_search_methods:
                         for i in range(len(top_individuals)):
                             individual = top_individuals[i]  # 원래 개체 사용
                             optimized_ind = method.optimize(copy.deepcopy(individual), self.config)
                             
-                            # Local Search 후 개체의 모든 속성 업데이트
-                            optimized_ind.seq = optimized_ind.seq[:]  # 최종 seq 반영
-                            optimized_ind.job_seq = optimized_ind.get_repeatable()  # job_seq 업데이트
-                            optimized_ind.feasible_seq = optimized_ind.get_feasible()  # feasible_seq 업데이트
-                            optimized_ind.machine_order = optimized_ind.get_machine_order()  # machine_order 재계산
-                            optimized_ind.makespan, _ = optimized_ind.evaluate(optimized_ind.machine_order)  # makespan 재계산
-
-                            # 비교를 통해 기존 개체보다 더 나은 경우에만 대체
+                            # 비교를 통해 기존 개체보다 더 나은 경우에만 대체 <=로 바꿈
                             if optimized_ind.makespan <= individual.makespan:
                                 self.population.individuals[top_indices[i]] = optimized_ind
                                 top_individuals[i] = optimized_ind  # top_individuals에서도 대체
@@ -277,11 +252,6 @@ class GAEngine:
                                 # 기존 개체 유지, 아무 작업도 하지 않음
                                 pass
 
-
-
-                best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
-                best_fitness = best_individual.makespan
-                print(f"GA{index+1}_Best fitness at generation Local Search 후 {sync_generation[index]}: {best_fitness}")
 
                 # 이주가 가능한 경우
                 if self.island_mode != 1 and sync_generation[index] % self.migration_frequency == 0 and sync_generation[index] != 0 and self.ga_engines:
@@ -352,11 +322,24 @@ class GAEngine:
                             else:
                                 print(f"new_populations[{target_index}] is empty, skipping migration.")
 
+
+
+                if sync_generation[index] > 0 and self.selective_mutation and sync_generation[index] % self.selective_mutation_frequency == 0:
+                    print(f'GA{index+1}_Selective Mutation 전반부 적용')
+                    self.selective_mutation.mutate(self.population.individuals, self.config)
+
                 self.population.evaluate(self.config.target_makespan)
-                best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
-                best_fitness = best_individual.makespan                
-                print(f"GA{index+1}_Best fitness at generation 이주 후 {sync_generation[index]}: {best_fitness}")
-                # print(f"{sync_generation[index]}: {best_fitness}, Sequence: {best_individual.seq}")
+                # best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
+
+                print(f"GA{index+1}_Generation {sync_generation[index]} evaluated")
+                # current_best = min(self.population.individuals, key=lambda ind: ind.makespan)
+                # if current_best.makespan < best_fitness:
+                #     best_individual = current_best
+                #     best_fitness = current_best.makespan
+                #     print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness}")
+
+                #     if self.best_time is None or current_best.makespan < self.config.target_makespan:
+                #         self.best_time = time.time() - start_time
 
                 generation_data = [(ind.seq, ind.makespan) for ind in self.population.individuals]
                 all_generations.append((sync_generation[index], generation_data))
@@ -400,8 +383,8 @@ class GAEngine:
 
         except Exception as e:
             print(f"Error during GA{index+1} evolution at generation {sync_generation[index]}: {str(e)}")
-            # for ind in self.population.individuals:
-            #     print(f"Seq: {ind.seq}, Makespan: {ind.makespan}, Machine Order: {ind.machine_order}")
+            for ind in self.population.individuals:
+                print(f"Seq: {ind.seq}, Makespan: {ind.makespan}, Machine Order: {ind.machine_order}")
 
             return None, None, None, [], 0, None
 
