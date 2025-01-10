@@ -151,7 +151,7 @@ def run_ga_engine(args):
 
 
 
-def main():
+def main(file):
     """
     Main function to setup and execute the GA engines.
     """
@@ -160,39 +160,47 @@ def main():
     ############################################################################################
     # 1. 기본, 2. 시퀀스 이주 3. 랜덤 이주
     ############################################################################################
+    print("Starting main function...")  # 디버그 출력 추가
+    island_mode = '1'
 
-
-    island_mode = int(input("Select Island-Parallel GA mode (1: Independent, 2: Sequential Migration, 3: Random Migration): "))
-    print(f"Selected Island-Parallel GA mode: {island_mode}")
+    # island_mode = int(input("Select Island-Parallel GA mode (1: Independent, 2: Sequential Migration, 3: Random Migration): "))
+    # print(f"Selected Island-Parallel GA mode: {island_mode}")
 
     ############################################################################################
     # 1) file, Run_Config 조정바람
     ############################################################################################
 
-    file = 'la01.txt'
+    # file = 'la01.txt'
     print(f"Loading dataset from {file}...")  # 디버그 출력 추가
     dataset = Dataset(file)
 
     # Custom GA settings    
-    base_config = Run_Config(n_job=10, n_machine=5, n_op=50, population_size=100, generations=400, 
-                             print_console=False, save_log=True, save_machinelog=True, 
+    base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op,
+                             population_size=100, generations=400,
+                             print_console=False, save_log=True, save_machinelog=True,
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
-                             tabu_search_iterations=10, hill_climbing_iterations=30, simulated_annealing_iterations=50,two_iterations=1000)
-    
+                             tabu_search_iterations=10, hill_climbing_iterations=30,
+                             simulated_annealing_iterations=50, two_iterations=1000)
+
     print("Base config created...")  # 디버그 출력 추가
 
     base_config.dataset_filename = file  # dataset 파일명 설정
     base_config.target_makespan = TARGET_MAKESPAN  # 목표 Makespan
-    base_config.island_mode = island_mode  # Add this line to set island_mode
+    base_config.island_mode = '1'  # Add this line to set island_mode
+    # base_config.island_mode = island_mode  # Add this line to set island_mode
+    now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
     result_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'result')
-    result_txt_path = os.path.join(result_path, 'result_txt')
-    result_gantt_path = os.path.join(result_path, 'result_Gantt')
-    ga_generations_path = os.path.join(result_path, 'ga_generations')
+    experiment_path = os.path.join(result_path, now)
+    result_txt_path = os.path.join(experiment_path, 'result_txt')
+    result_gantt_path = os.path.join(experiment_path, 'result_Gantt')
+    ga_generations_path = os.path.join(experiment_path, 'ga_generations')
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
+    if not os.path.exists(experiment_path):
+        os.makedirs(experiment_path)
     if not os.path.exists(result_txt_path):
         os.makedirs(result_txt_path)
     if not os.path.exists(result_gantt_path):
@@ -237,8 +245,11 @@ def main():
 
     custom_settings = [
         # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
+        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
+        {'crossover': PMXCrossover, 'pc': 0.9, 'mutation': GeneralMutation, 'pm': 0.9, 'selection': RouletteSelection(),
+         'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
+
     ]
 
     ga_engines = []
@@ -253,7 +264,8 @@ def main():
         pc = setting['pc']
         pm = setting['pm']
 
-        initialization_mode = input(f"Select Initialization GA mode for GA{i+1} (1: basic, 2: MIO, 3: GifflerThompson): ")
+        initialization_mode = '1'
+        # initialization_mode = input(f"Select Initialization GA mode for GA{i+1} (1: basic, 2: MIO, 3: GifflerThompson): ")
         print(f"Selected Initialization GA mode for GA{i+1}: {initialization_mode}")
 
         config = copy.deepcopy(base_config)
@@ -383,4 +395,4 @@ def main():
                 print(f"Warning: {machine_log_path} does not exist.")
 
 if __name__ == "__main__":
-    main()
+    main('la01.txt')
