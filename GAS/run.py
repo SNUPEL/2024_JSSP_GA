@@ -106,10 +106,10 @@ random_seed = None  # Population 초기화시 일정하게 만들기 위함. Non
 
 
 def run_ga_engine(args):
-    ga_engine, index, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events, new_populations = args
+    ga_engine, index, result_exp_path, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events, new_populations = args
     try:
         # evolve 함수 호출 시 new_populations 전달
-        best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, new_populations, events)
+        best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, new_populations, events, dirname=result_exp_path)
         
         # GA 엔진 상태 출력
         print(f"GA{index+1} 상태:")
@@ -151,12 +151,10 @@ def run_ga_engine(args):
 
 
 
-def main(file):
+def main(file, _instance, _initialization):
     """
     Main function to setup and execute the GA engines.
     """
-    print("Starting main function...")  # 디버그 출력 추가
-
     ############################################################################################
     # 1. 기본, 2. 시퀀스 이주 3. 랜덤 이주
     ############################################################################################
@@ -176,7 +174,7 @@ def main(file):
 
     # Custom GA settings    
     base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op,
-                             population_size=100, generations=400,
+                             population_size=100, generations=100,
                              print_console=False, save_log=True, save_machinelog=True,
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -186,15 +184,16 @@ def main(file):
     print("Base config created...")  # 디버그 출력 추가
 
     base_config.dataset_filename = file  # dataset 파일명 설정
-    base_config.target_makespan = TARGET_MAKESPAN  # 목표 Makespan
+    base_config.target_makespan = None  # 목표 Makespan
+    # base_config.target_makespan = TARGET_MAKESPAN  # 목표 Makespan
     base_config.island_mode = '1'  # Add this line to set island_mode
     # base_config.island_mode = island_mode  # Add this line to set island_mode
-    now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    now = datetime.datetime.now().strftime('%m-%d-%H-%M-%S') + '-'+_instance+"-Mode"+_initialization
 
     result_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'result')
     experiment_path = os.path.join(result_path, now)
-    result_txt_path = os.path.join(experiment_path, 'result_txt')
-    result_gantt_path = os.path.join(experiment_path, 'result_Gantt')
+    result_txt_path = os.path.join(experiment_path, 'txt')
+    result_gantt_path = os.path.join(experiment_path, 'Gantt')
     ga_generations_path = os.path.join(experiment_path, 'ga_generations')
 
     if not os.path.exists(result_path):
@@ -264,7 +263,8 @@ def main(file):
         pc = setting['pc']
         pm = setting['pm']
 
-        initialization_mode = '1'
+        initialization_mode = _initialization
+        # initialization_mode = '1'
         # initialization_mode = input(f"Select Initialization GA mode for GA{i+1} (1: basic, 2: MIO, 3: GifflerThompson): ")
         print(f"Selected Initialization GA mode for GA{i+1}: {initialization_mode}")
 
@@ -290,7 +290,7 @@ def main(file):
                                                                                                                         ##############################################
 
         if initialization_mode == '1':
-            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
+            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.05, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
         elif initialization_mode == '2':
             ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='2', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
         elif initialization_mode == '3':
@@ -318,7 +318,7 @@ def main(file):
             if island_mode in ['2', '3']:
                 args = [(ga_engines[i], i, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, events, new_populations) for i in range(len(ga_engines))]
             else:
-                args = [(ga_engines[i], i, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, None, new_populations) for i in range(len(ga_engines))]
+                args = [(ga_engines[i], i, experiment_path, result_txt_path, result_gantt_path, ga_generations_path, sync_generation, sync_lock, None, new_populations) for i in range(len(ga_engines))]
 
             results = pool.map(run_ga_engine, args)
 
@@ -384,7 +384,8 @@ def main(file):
             pso_name = ga_engines[i].pso.__class__.__name__ if ga_engines[i].pso else 'None'
             pc = best_crossover.pc
             pm = best_mutation.pm
-            print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds, First best time: {best_time:.2f} seconds")
+            print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds")
+            # print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds, First best time: {best_time:.2f} seconds")
             machine_log_path = os.path.join(result_txt_path, f'machine_log_GA{i+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
             gantt_path = os.path.join(result_gantt_path, f'gantt_chart_GA{i+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.png')
             if os.path.exists(machine_log_path):
@@ -395,4 +396,7 @@ def main(file):
                 print(f"Warning: {machine_log_path} does not exist.")
 
 if __name__ == "__main__":
-    main('la01.txt')
+    for problem in ['la01', 'la02']:
+        for ini in ['2']:
+        # for ini in ['1', '2']:
+            main(problem+'.txt', _instance=problem, _initialization=ini)

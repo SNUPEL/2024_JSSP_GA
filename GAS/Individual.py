@@ -74,15 +74,28 @@ class Individual:
         self.machine_order = self.get_machine_order()
         self.makespan, self.mio_score = self.evaluate(self.machine_order)
         self.score = calculate_score(self.MIO, self.MIO_sorted)
-        self.calculate_fitness(config.target_makespan)  # Ensure target_makespan is passed
+        self.calculate_fitness()  # Ensure target_makespan is passed
 
     def __str__(self):
         return f"Individual(makespan={self.makespan}, fitness={self.fitness})"
 
-    def calculate_fitness(self, target_makespan):
+    def calculate_fitness(self, best=None, worst=None):
         if self.makespan == 0:
             raise ValueError("Makespan is zero, which will cause division by zero error.")
-        self.fitness = 1 / (self.makespan / target_makespan)
+        if best is not None:
+            gap = worst - best
+            if best == worst:
+                self.fitness = 0.1
+            else:
+                ratio = (self.makespan - best + 1) / gap
+                # if denominator == 0:
+                #     denominator = 1
+                self.fitness = 1 - ratio
+                # if self.fitness <=0.5:
+                #     self.fitness = 0.1
+                # self.fitness = 1 / (self.makespan - target_makespan + 1)
+        else:
+            self.fitness = 1 / self.makespan
         return self.fitness
 
     def interpret_solution(self, s):

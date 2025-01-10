@@ -392,28 +392,29 @@ class Population:
         population.individuals = individuals
         return population
 
-    def evaluate(self, target_makespan):
+    def evaluate(self, best=None, worst=None):
         """
         Evaluates the fitness of each individual in the population.
         
         Parameters:
-            target_makespan (int): Target makespan for fitness calculation.
+            target_makespan (None, int): Target makespan for fitness calculation.
         """
         for individual in self.individuals:
             individual.makespan, individual.mio_score = individual.evaluate(individual.machine_order)
-            individual.calculate_fitness(target_makespan)
+            if best is not None:
+                individual.calculate_fitness(best, worst)
         self.individuals.sort(key=lambda x: x.fitness, reverse=True)
         # 스케일링 방법 선택 (Rank Scaling, Sigma Scaling, Boltzmann Scaling)
         scaling_method = 'min-max'  # 'min-max', 'sigma', 'boltzmann' 등을 사용할 수 있습니다.
-
-        if scaling_method == 'min-max':
-            self.min_max_scaling()
-        elif scaling_method == 'rank':
-            self.rank_scaling()
-        elif scaling_method == 'sigma':
-            self.sigma_scaling()
-        elif scaling_method == 'boltzmann':
-            self.boltzmann_scaling()
+        if best is not None:
+            if scaling_method == 'min-max':
+                self.min_max_scaling()
+            elif scaling_method == 'rank':
+                self.rank_scaling()
+            elif scaling_method == 'sigma':
+                self.sigma_scaling()
+            elif scaling_method == 'boltzmann':
+                self.boltzmann_scaling()
 
     def min_max_scaling(self):
         """

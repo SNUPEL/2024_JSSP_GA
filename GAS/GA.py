@@ -159,27 +159,31 @@ class GAEngine:
         # 로그 출력: 상위 10% 개체 확인
         # print(f"GA{index+1} 세대의 상위 10% 개체: {[ind.seq for ind in new_populations[index]]}")
 
-    def evolve(self, index, sync_generation, sync_lock, new_populations, events=None):
+    def evolve(self, index, sync_generation, sync_lock, new_populations, events=None, dirname=None):
         try:
             all_generations = []
             start_time = time.time()
             best_individual = None
             best_fitness = float('inf')
             
-            base_filename = f"population_generations_{index+1}"
+            base_filename = dirname+f"\\population_generations_{index+1}"
             filename = get_next_filename(base_filename)  # 다음 사용 가능한 파일 이름을 가져옵니다.
 
             while sync_generation[index] < self.config.generations:
                 # print(f"GA{index+1}_Evaluating generation {sync_generation[index]}")
 
-
-                self.population.evaluate(self.config.target_makespan)
+                # 처음에는 그냥 시작
+                self.population.evaluate(best=None)
                 print(f"GA{index+1} Population: {self.population is not None}")
                 print(f"GA{index+1} Best Individual: {best_individual is not None}")
 
 
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
+                worst_individual = max(self.population.individuals, key=lambda ind: ind.makespan)
                 best_fitness = best_individual.makespan
+                worst_fitness = worst_individual.makespan
+                self.population.evaluate(best=best_fitness, worst=worst_fitness)
+                # self.config.target_makespan = best_fitness
                 print(f"GA{index+1}_Best fitness at generation select crossover mutate 전 {sync_generation[index]}: {best_fitness}")
 
                 # 엘리트 개체 선택
@@ -203,7 +207,8 @@ class GAEngine:
                 population_size = len(self.population.individuals)  # population의 갯수 계산
                 print(f"GA{index+1} - 전체 population After crossover (Total Population: {population_size}):")
 
-                self.population.evaluate(self.config.target_makespan)
+                self.population.evaluate(best=best_fitness, worst=worst_fitness)
+                # self.population.evaluate(self.config.target_makespan)
 
                 # 엘리트 개체를 population에 다시 삽입
                 for elite in elites:
@@ -213,7 +218,8 @@ class GAEngine:
                     self.population.individuals[worst_index] = copy.deepcopy(elite)
                     print(f"Inserted elite at index {worst_index} - Makespan: {elite.makespan}, Fitness: {elite.fitness}")
 
-                self.population.evaluate(self.config.target_makespan)
+                self.population.evaluate(best=best_fitness, worst=worst_fitness)
+                # self.population.evaluate(self.config.target_makespan)
                 # best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
                 # best_fitness = best_individual.makespan
                  
@@ -225,138 +231,139 @@ class GAEngine:
                 self.update_new_populations(index, new_populations)
                 # print(new_populations)
 
-                if sync_generation[index] >= 1 and sync_generation[index] % self.local_search_frequency == 0:
-                    print(f"GA{index+1}_Applying local search")
-                    
-                    total_percentage = self.local_search_top_percentage  # 예를 들어, 0.5이면 50%
-                    top_percentage = 1 * total_percentage  # 상위 10%는 top_percentage에 해당
 
-                    # 상위 10% 개체 추출 (가장 우수한 개체들)
-                    top_count = int(len(self.population.individuals) * top_percentage)
-                    top_indices_and_individuals = sorted(
-                        enumerate(self.population.individuals),
-                        key=lambda ind: ind[1].makespan
-                    )[:top_count]
+                # if sync_generation[index] >= 1 and sync_generation[index] % self.local_search_frequency == 0:
+                #     print(f"GA{index+1}_Applying local search")
+                #
+                #     total_percentage = self.local_search_top_percentage  # 예를 들어, 0.5이면 50%
+                #     top_percentage = 1 * total_percentage  # 상위 10%는 top_percentage에 해당
+                #
+                #     # 상위 10% 개체 추출 (가장 우수한 개체들)
+                #     top_count = int(len(self.population.individuals) * top_percentage)
+                #     top_indices_and_individuals = sorted(
+                #         enumerate(self.population.individuals),
+                #         key=lambda ind: ind[1].makespan
+                #     )[:top_count]
+                #
+                #     # 나머지 개체들 중에서 무작위로 나머지 40% 선택
+                #     remaining_count = int(len(self.population.individuals) * (total_percentage - top_percentage))
+                #
+                #     remaining_indices_and_individuals = sorted(
+                #         enumerate(self.population.individuals),
+                #         key=lambda ind: ind[1].makespan
+                #     )[top_count:]  # 상위 10% 이후의 개체들
+                #
+                #     random_remaining = random.sample(remaining_indices_and_individuals, remaining_count)
+                #
+                #     # # 선택된 상위 10%와 무작위 40%를 결합
+                #     # selected_individuals = top_indices_and_individuals + random_remaining
+                #
+                #     # top_individuals = [copy.deepcopy(individual) for idx, individual in selected_individuals]
+                #     # top_indices = [idx for idx, individual in selected_individuals]
+                #
+                #     top_individuals = [copy.deepcopy(individual) for idx, individual in top_indices_and_individuals]
+                #     top_indices = [idx for idx, individual in top_indices_and_individuals]
+                #
+                #     for method in self.local_search_methods:
+                #         for i in range(len(top_individuals)):
+                #             individual = top_individuals[i]  # 원래 개체 사용
+                #             optimized_ind = method.optimize(copy.deepcopy(individual), self.config)
+                #
+                #             # Local Search 후 개체의 모든 속성 업데이트
+                #             optimized_ind.seq = optimized_ind.seq[:]  # 최종 seq 반영
+                #             optimized_ind.job_seq = optimized_ind.get_repeatable()  # job_seq 업데이트
+                #             optimized_ind.feasible_seq = optimized_ind.get_feasible()  # feasible_seq 업데이트
+                #             optimized_ind.machine_order = optimized_ind.get_machine_order()  # machine_order 재계산
+                #             optimized_ind.makespan, _ = optimized_ind.evaluate(optimized_ind.machine_order)  # makespan 재계산
+                #
+                #             # 비교를 통해 기존 개체보다 더 나은 경우에만 대체
+                #             if optimized_ind.makespan <= individual.makespan:
+                #                 self.population.individuals[top_indices[i]] = optimized_ind
+                #                 top_individuals[i] = optimized_ind  # top_individuals에서도 대체
+                #             else:
+                #                 # 기존 개체 유지, 아무 작업도 하지 않음
+                #                 pass
+                #
+                # best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
+                # best_fitness = best_individual.makespan
+                # print(f"GA{index+1}_Best fitness at generation Local Search 후 {sync_generation[index]}: {best_fitness}")
 
-                    # 나머지 개체들 중에서 무작위로 나머지 40% 선택
-                    remaining_count = int(len(self.population.individuals) * (total_percentage - top_percentage))
-                    
-                    remaining_indices_and_individuals = sorted(
-                        enumerate(self.population.individuals),
-                        key=lambda ind: ind[1].makespan
-                    )[top_count:]  # 상위 10% 이후의 개체들
-
-                    random_remaining = random.sample(remaining_indices_and_individuals, remaining_count)
-
-                    # # 선택된 상위 10%와 무작위 40%를 결합
-                    # selected_individuals = top_indices_and_individuals + random_remaining
-
-                    # top_individuals = [copy.deepcopy(individual) for idx, individual in selected_individuals]
-                    # top_indices = [idx for idx, individual in selected_individuals]
-
-                    top_individuals = [copy.deepcopy(individual) for idx, individual in top_indices_and_individuals]
-                    top_indices = [idx for idx, individual in top_indices_and_individuals]
-
-                    for method in self.local_search_methods:
-                        for i in range(len(top_individuals)):
-                            individual = top_individuals[i]  # 원래 개체 사용
-                            optimized_ind = method.optimize(copy.deepcopy(individual), self.config)
-                            
-                            # Local Search 후 개체의 모든 속성 업데이트
-                            optimized_ind.seq = optimized_ind.seq[:]  # 최종 seq 반영
-                            optimized_ind.job_seq = optimized_ind.get_repeatable()  # job_seq 업데이트
-                            optimized_ind.feasible_seq = optimized_ind.get_feasible()  # feasible_seq 업데이트
-                            optimized_ind.machine_order = optimized_ind.get_machine_order()  # machine_order 재계산
-                            optimized_ind.makespan, _ = optimized_ind.evaluate(optimized_ind.machine_order)  # makespan 재계산
-
-                            # 비교를 통해 기존 개체보다 더 나은 경우에만 대체
-                            if optimized_ind.makespan <= individual.makespan:
-                                self.population.individuals[top_indices[i]] = optimized_ind
-                                top_individuals[i] = optimized_ind  # top_individuals에서도 대체
-                            else:
-                                # 기존 개체 유지, 아무 작업도 하지 않음
-                                pass
-
-
-
-                best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
-                best_fitness = best_individual.makespan
-                print(f"GA{index+1}_Best fitness at generation Local Search 후 {sync_generation[index]}: {best_fitness}")
-
-                # 이주가 가능한 경우
-                if self.island_mode != 1 and sync_generation[index] % self.migration_frequency == 0 and sync_generation[index] != 0 and self.ga_engines:
-                    # if events:
-                    #     for event in events:
-                    #         event.set()
-                    #     for event in events:
-                    #         event.wait()
-                    #     for event in events:
-                    #         event.clear()
-
-                    # print(f'island_mode{self.island_mode}')
-                    # print(f"GA{index+1}_Preparing for migration at generation {sync_generation[index]}")
-
-                    # 이주 방식에 따른 순서 설정
-                    if self.island_mode == 2:
-                        # print(f"GA{index+1}_Migration 중 (순차) at generation {sync_generation[index]}")
-                        migration_order = [(i + 1) % len(self.ga_engines) for i in range(len(self.ga_engines))]
-                        print(f"Migration order: {migration_order}")
-                    elif self.island_mode == 3:
-                        # print(f"GA{index+1}_Migration 중 (랜덤) at generation {sync_generation[index]}")
-                        migration_order = list(range(len(self.ga_engines)))
-                        random.shuffle(migration_order)
-                        print(f'랜덤 migration_order: {migration_order}')
-                    else:
-                        migration_order = range(len(self.ga_engines))
-                    # print(f'최종 migration_order: {migration_order}')
-
-                    # 각 GA 엔진 간 이주 수행
-                    # 각 GA 엔진 간 이주 수행
-                    for i in range(len(self.ga_engines)):
-                        target_index = migration_order[i]
-
-                        if target_index != i and sync_generation[i] % self.migration_frequency == 0:
-                            print(f"GA{i+1} is migrating, receiving individuals from GA{target_index+1}")
-
-                            if new_populations[target_index]:
-                                best_index = min(range(len(self.ga_engines[i].population.individuals)), key=lambda idx: self.ga_engines[i].population.individuals[idx].makespan)
-                                other_indices = [idx for idx in range(len(self.ga_engines[i].population.individuals)) if idx != best_index]
-
-                                for j in range(len(new_populations[target_index])):
-                                    random_index = random.choice(other_indices)
-                                    other_indices.remove(random_index)
-
-                                    # 개체 복사 (seq만 복사)
-                                    migrated_individual = copy.deepcopy(new_populations[target_index][j])
-
-                                    # machine_order는 이주 후 재계산
-                                    migrated_individual.machine_order = migrated_individual.get_machine_order()
-                                    
-                                    # 이동 전후 상태 출력
-                                    # print(f"Before Migration - GA{i+1}, Individual Seq: {self.ga_engines[i].population.individuals[random_index].seq}, Makespan: {self.ga_engines[i].population.individuals[random_index].makespan}")
-                                    # print(f"After Migration - GA{i+1}, Migrated Individual Seq: {migrated_individual.seq}, Makespan: {migrated_individual.makespan}")
-
-                                    # 마이그레이션 완료 후 상태 확인
-                                    self.ga_engines[i].population.individuals[random_index] = migrated_individual
-
-                                print(f"Migrating from GA{target_index+1} to GA{i+1} 완료")
-                                
-                                # 이주 후 population 평가
-                                self.ga_engines[i].population.evaluate(self.config.target_makespan)
-
-                                # 이주 후 상태 출력
-                                # print(f"이주 후 GA{i+1}의 population 상태:")
-                                # for ind in self.ga_engines[i].population.individuals:
-                                #     print(f"After evaluation: Seq: {ind.seq}, Makespan: {ind.makespan}")
-
-                            else:
-                                print(f"new_populations[{target_index}] is empty, skipping migration.")
-
-                self.population.evaluate(self.config.target_makespan)
-                best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
-                best_fitness = best_individual.makespan                
-                print(f"GA{index+1}_Best fitness at generation 이주 후 {sync_generation[index]}: {best_fitness}")
-                # print(f"{sync_generation[index]}: {best_fitness}, Sequence: {best_individual.seq}")
+                # # 이주가 가능한 경우
+                # if self.island_mode != 1 and sync_generation[index] % self.migration_frequency == 0 and sync_generation[index] != 0 and self.ga_engines:
+                #     # if events:
+                #     #     for event in events:
+                #     #         event.set()
+                #     #     for event in events:
+                #     #         event.wait()
+                #     #     for event in events:
+                #     #         event.clear()
+                #
+                #     # print(f'island_mode{self.island_mode}')
+                #     # print(f"GA{index+1}_Preparing for migration at generation {sync_generation[index]}")
+                #
+                #     # 이주 방식에 따른 순서 설정
+                #     if self.island_mode == 2:
+                #         # print(f"GA{index+1}_Migration 중 (순차) at generation {sync_generation[index]}")
+                #         migration_order = [(i + 1) % len(self.ga_engines) for i in range(len(self.ga_engines))]
+                #         print(f"Migration order: {migration_order}")
+                #     elif self.island_mode == 3:
+                #         # print(f"GA{index+1}_Migration 중 (랜덤) at generation {sync_generation[index]}")
+                #         migration_order = list(range(len(self.ga_engines)))
+                #         random.shuffle(migration_order)
+                #         print(f'랜덤 migration_order: {migration_order}')
+                #     else:
+                #         migration_order = range(len(self.ga_engines))
+                #     # print(f'최종 migration_order: {migration_order}')
+                #
+                #     # 각 GA 엔진 간 이주 수행
+                #     # 각 GA 엔진 간 이주 수행
+                #     for i in range(len(self.ga_engines)):
+                #         target_index = migration_order[i]
+                #
+                #         if target_index != i and sync_generation[i] % self.migration_frequency == 0:
+                #             print(f"GA{i+1} is migrating, receiving individuals from GA{target_index+1}")
+                #
+                #             if new_populations[target_index]:
+                #                 best_index = min(range(len(self.ga_engines[i].population.individuals)), key=lambda idx: self.ga_engines[i].population.individuals[idx].makespan)
+                #                 other_indices = [idx for idx in range(len(self.ga_engines[i].population.individuals)) if idx != best_index]
+                #
+                #                 for j in range(len(new_populations[target_index])):
+                #                     random_index = random.choice(other_indices)
+                #                     other_indices.remove(random_index)
+                #
+                #                     # 개체 복사 (seq만 복사)
+                #                     migrated_individual = copy.deepcopy(new_populations[target_index][j])
+                #
+                #                     # machine_order는 이주 후 재계산
+                #                     migrated_individual.machine_order = migrated_individual.get_machine_order()
+                #
+                #                     # 이동 전후 상태 출력
+                #                     # print(f"Before Migration - GA{i+1}, Individual Seq: {self.ga_engines[i].population.individuals[random_index].seq}, Makespan: {self.ga_engines[i].population.individuals[random_index].makespan}")
+                #                     # print(f"After Migration - GA{i+1}, Migrated Individual Seq: {migrated_individual.seq}, Makespan: {migrated_individual.makespan}")
+                #
+                #                     # 마이그레이션 완료 후 상태 확인
+                #                     self.ga_engines[i].population.individuals[random_index] = migrated_individual
+                #
+                #                 print(f"Migrating from GA{target_index+1} to GA{i+1} 완료")
+                #
+                #                 # 이주 후 population 평가
+                #                 self.ga_engines[i].population.evaluate(self.config.target_makespan)
+                #
+                #                 # 이주 후 상태 출력
+                #                 # print(f"이주 후 GA{i+1}의 population 상태:")
+                #                 # for ind in self.ga_engines[i].population.individuals:
+                #                 #     print(f"After evaluation: Seq: {ind.seq}, Makespan: {ind.makespan}")
+                #
+                #             else:
+                #                 print(f"new_populations[{target_index}] is empty, skipping migration.")
+                #
+                # self.population.evaluate(target_makespan = best_fitness)
+                # # self.population.evaluate(self.config.target_makespan)
+                # best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
+                # best_fitness = best_individual.makespan
+                #
+                # print(f"GA{index+1}_Best fitness at generation 이주 후 {sync_generation[index]}: {best_fitness}")
+                # # print(f"{sync_generation[index]}: {best_fitness}, Sequence: {best_individual.seq}")
 
                 generation_data = [(ind.seq, ind.makespan) for ind in self.population.individuals]
                 all_generations.append((sync_generation[index], generation_data))
@@ -364,12 +371,12 @@ class GAEngine:
                 # 각 세대의 인구를 CSV 파일에 저장
                 save_population_to_csv(self.population, filename, sync_generation[index])
                 
-                if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
-                    elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
-                    print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
-                    print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
-
-                    break
+                # if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
+                #     elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
+                #     print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
+                #     print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
+                #
+                #     break
 
                 with sync_lock:
                     sync_generation[index] += 1
