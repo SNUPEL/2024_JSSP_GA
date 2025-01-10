@@ -94,6 +94,10 @@ abz5 = 1234  10, 10
 ft20 = 1165
 '''
 
+############################################################################################
+# TARGET_MAKESPAN 문제에 맞게 수정바람
+############################################################################################
+
 # Configuration for target makespan and migration frequency
 TARGET_MAKESPAN = 666  # 목표 Makespan
 MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
@@ -153,15 +157,24 @@ def main():
     """
     print("Starting main function...")  # 디버그 출력 추가
 
+    ############################################################################################
+    # 1. 기본, 2. 시퀀스 이주 3. 랜덤 이주
+    ############################################################################################
+
+
     island_mode = int(input("Select Island-Parallel GA mode (1: Independent, 2: Sequential Migration, 3: Random Migration): "))
     print(f"Selected Island-Parallel GA mode: {island_mode}")
 
-    file = 'ta21.txt'
+    ############################################################################################
+    # 1) file, Run_Config 조정바람
+    ############################################################################################
+
+    file = 'la01.txt'
     print(f"Loading dataset from {file}...")  # 디버그 출력 추가
     dataset = Dataset(file)
 
     # Custom GA settings    
-    base_config = Run_Config(n_job=20, n_machine=20, n_op=400, population_size=100, generations=400, 
+    base_config = Run_Config(n_job=10, n_machine=5, n_op=50, population_size=100, generations=400, 
                              print_console=False, save_log=True, save_machinelog=True, 
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -217,9 +230,14 @@ def main():
     ['pso': PSO(num_particles=10, num_iterations=50)], 'pso': None  # PSO 추가
     '''
 
+
+    ############################################################################################
+    # 1) crossover, mutation,selection 종류 선택 및 확률 조정
+    ############################################################################################
+
     custom_settings = [
         # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
+        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
     ]
 
@@ -251,9 +269,13 @@ def main():
         selection = selection_instance
         pso = pso_class if pso_class else None
         local_search = local_search_methods
-        local_search_frequency = 1
-        selective_mutation_frequency = 1000
+        local_search_frequency = 100000
+        selective_mutation_frequency = 100000
         selective_mutation = selective_mutation_instance
+
+                                                                                                                        ##############################################
+                                                                                                                        # elite_ratio 설정: 0.1이면 10%
+                                                                                                                        ##############################################
 
         if initialization_mode == '1':
             ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)

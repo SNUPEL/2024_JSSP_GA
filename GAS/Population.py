@@ -24,6 +24,10 @@ from Data.Dataset.Dataset import Dataset
 
 print_console = False
 
+############################################################################################
+# Operation, MIOMachine, JSSP은 MIO를 위한거
+############################################################################################
+
 class Operation:
     """
     Represents an operation in the job shop.
@@ -184,6 +188,10 @@ class JSSP:
         self.__init__(self.dataset)
         return s
 
+############################################################################################
+# GifflerThompson으로써 각종 휴리스틱
+############################################################################################
+
 class GifflerThompson:
     """
     Applies Giffler-Thompson heuristic for optimizing job shop scheduling.
@@ -233,6 +241,7 @@ class GifflerThompson:
                 best_individuals.append((optimized_individual, rule))
 
         selected_individual, selected_rule = random.choice(best_individuals)
+        print(f"selected_rule: {selected_rule}")
         return selected_individual
 
     def giffler_thompson(self, seq, op_data, config, priority_rule):
@@ -324,6 +333,9 @@ class Population:
             np.random.seed(random_seed)        
         self.individuals = [Individual(config, seq=random.sample(range(config.n_op), config.n_op), op_data=op_data) for _ in range(config.population_size)]
 
+    ##############################################  
+    #               MIO를 위한거                  #
+    ##############################################
     @classmethod
     def from_mio(cls, config, op_data, dataset_filename, random_seed=None):
         """
@@ -347,6 +359,10 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = individuals
         return population
+
+    ##############################################  
+    #            휴리스틱 위한거                  #
+    ##############################################
 
     @classmethod
     def from_giffler_thompson(cls, config, op_data, dataset_filename, random_seed=None):
