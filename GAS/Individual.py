@@ -83,17 +83,18 @@ class Individual:
         if self.makespan == 0:
             raise ValueError("Makespan is zero, which will cause division by zero error.")
         if best is not None:
-            gap = worst - best
-            if best == worst:
-                self.fitness = 0.1
-            else:
-                ratio = (self.makespan - best + 1) / gap
-                # if denominator == 0:
-                #     denominator = 1
-                self.fitness = 1 - ratio
-                # if self.fitness <=0.5:
-                #     self.fitness = 0.1
-                # self.fitness = 1 / (self.makespan - target_makespan + 1)
+            self.fitness = 1 / (self.makespan/best)
+            # gap = worst - best
+            # if best == worst:
+            #     self.fitness = 0.1
+            # else:
+            #     ratio = (self.makespan - best + 1) / gap
+            #     # if denominator == 0:
+            #     #     denominator = 1
+            #     self.fitness = 1 - ratio
+            #     # if self.fitness <=0.5:
+            #     #     self.fitness = 0.1
+            #     # self.fitness = 1 / (self.makespan - target_makespan + 1)
         else:
             self.fitness = 1 / self.makespan
         return self.fitness

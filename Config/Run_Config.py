@@ -74,7 +74,7 @@ class Run_Config:
         self.show_gantt = show_gantt
         self.save_gantt = save_gantt
         self.show_gui = show_gui
-
+        self.target_makespan = None
         self.num_parts = 1
         self.IAT = float("inf")
 
@@ -97,15 +97,14 @@ class Run_Config:
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
-        ga_generations_path = os.path.join(self.save_path, 'ga_generations')
-        if not os.path.exists(ga_generations_path):
-            os.makedirs(ga_generations_path)
+        # ga_generations_path = os.path.join(self.save_path, 'ga_generations')
+        # if not os.path.exists(ga_generations_path):
+        #     os.makedirs(ga_generations_path)
                         
         now = datetime.datetime.now()
         self.now = now.strftime('%Y-%m-%d-%H-%M-%S')
         self.filename = {
             'log': os.path.join(self.save_path, f'GA{ga_index}_{self.now}.csv'),
             'machine': os.path.join(self.save_path, f'GA{ga_index}_{self.now}_machine.csv'),
-            'gantt': os.path.join(self.save_path, f'GA{ga_index}_{self.now}.png'),
-            'csv': os.path.join(ga_generations_path, f'GA{ga_index}_{self.now}.csv')  # 추가된 부분
+            'gantt': os.path.join(self.save_path, f'GA{ga_index}_{self.now}.png')  # 추가된 부분
         }

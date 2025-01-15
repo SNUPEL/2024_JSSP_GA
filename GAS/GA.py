@@ -100,7 +100,10 @@ class GAEngine:
         population (Population): Population of individuals in the GA.
     """
     
-    def __init__(self, config, op_data, crossover, mutation, selection, local_search=None, pso=None, selective_mutation=None, elite_ratio=0.1, ga_engines=None, island_mode=1, migration_frequency=10, initialization_mode='1', dataset_filename=None, initial_population=None, local_search_frequency=2, selective_mutation_frequency=10, random_seed=None):
+    def __init__(self, config, op_data, crossover, mutation, selection, local_search=None, pso=None,
+                 selective_mutation=None, elite_ratio=0.1, ga_engines=None, island_mode=1,
+                 migration_frequency=10, initialization_mode='1', dataset_filename=None, initial_population=None,
+                 local_search_frequency=2, selective_mutation_frequency=10, random_seed=None):
         """
         Initializes the GA engine with the given parameters.
         
@@ -134,7 +137,8 @@ class GAEngine:
         self.pso = pso
         self.selective_mutation = selective_mutation
         self.elite_ratio = elite_ratio
-        self.best_time = None
+        self.best_time = []
+        self.best_makespan = []
         self.ga_engines = ga_engines
         self.island_mode = island_mode
         self.migration_frequency = migration_frequency
@@ -142,14 +146,20 @@ class GAEngine:
         self.local_search_frequency = local_search_frequency
         self.selective_mutation_frequency = selective_mutation_frequency
         self.random_seed = random_seed
-        self.local_search_top_percentage = 0.01  
 
-        if initialization_mode == '2':
-            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
-        elif initialization_mode == '3':
-            self.population = Population.from_giffler_thompson(config, op_data, dataset_filename, random_seed=random_seed)
-        else:
+        self.local_search_top_percentage = 0.01
+
+        if initialization_mode == '0':
             self.population = Population(config, op_data, random_seed=random_seed)
+        else:
+            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed, percentage = int(initialization_mode))
+
+    # if initialization_mode == '2':
+        #     self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
+        # elif initialization_mode == '3':
+        #     self.population = Population.from_giffler_thompson(config, op_data, dataset_filename, random_seed=random_seed)
+        # else:
+        #     self.population = Population(config, op_data, random_seed=random_seed)
 
     def update_new_populations(self, index, new_populations):
         # 현재 population에서 상위 10% 개체를 추출하여 new_populations에 저장
@@ -182,9 +192,19 @@ class GAEngine:
                 worst_individual = max(self.population.individuals, key=lambda ind: ind.makespan)
                 best_fitness = best_individual.makespan
                 worst_fitness = worst_individual.makespan
+                if best_fitness not in self.best_makespan:
+                    self.best_makespan.append(best_fitness)
+                    now = time.time()
+                    self.best_time.append(now-start_time)
+
                 self.population.evaluate(best=best_fitness, worst=worst_fitness)
                 # self.config.target_makespan = best_fitness
                 print(f"GA{index+1}_Best fitness at generation select crossover mutate 전 {sync_generation[index]}: {best_fitness}")
+
+                # 동일한 makespan을 가진 개체들의 개수 세기
+                count = sum(1 for ind in self.population.individuals if ind.makespan == best_individual.makespan)
+
+                print(f"Best individual과 동일한 makespan을 가진 개체의 개수: {count}")
 
                 # 엘리트 개체 선택
                 num_elites = int(self.elite_ratio * len(self.population.individuals))
@@ -208,7 +228,6 @@ class GAEngine:
                 print(f"GA{index+1} - 전체 population After crossover (Total Population: {population_size}):")
 
                 self.population.evaluate(best=best_fitness, worst=worst_fitness)
-                # self.population.evaluate(self.config.target_makespan)
 
                 # 엘리트 개체를 population에 다시 삽입
                 for elite in elites:
@@ -216,7 +235,7 @@ class GAEngine:
                     worst_index = max(range(len(self.population.individuals)), key=lambda idx: self.population.individuals[idx].makespan)
                     # 엘리트 개체의 깊은 복사본을 생성하여 삽입
                     self.population.individuals[worst_index] = copy.deepcopy(elite)
-                    print(f"Inserted elite at index {worst_index} - Makespan: {elite.makespan}, Fitness: {elite.fitness}")
+                    # print(f"Inserted elite at index {worst_index} - Makespan: {elite.makespan}, Fitness: {elite.fitness}")
 
                 self.population.evaluate(best=best_fitness, worst=worst_fitness)
                 # self.population.evaluate(self.config.target_makespan)
@@ -371,12 +390,12 @@ class GAEngine:
                 # 각 세대의 인구를 CSV 파일에 저장
                 save_population_to_csv(self.population, filename, sync_generation[index])
                 
-                # if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
-                #     elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
-                #     print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
-                #     print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
-                #
-                #     break
+                if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
+                    elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
+                    print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
+                    print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
+
+                    break
 
                 with sync_lock:
                     sync_generation[index] += 1
@@ -389,21 +408,22 @@ class GAEngine:
             #         optimized_individual = self.apply_ORtools(individual)
             #         self.population.individuals[i] = optimized_individual
 
-            if self.pso:
-                print(f"GA{index+1}_Applying PSO after all generations")
-                for i in range(len(self.population.individuals)):
-                    individual = self.population.individuals[i]
-                    optimized_individual = self.apply_pso(individual)
-                    self.population.individuals[i] = optimized_individual
+            # if self.pso:
+            #     print(f"GA{index+1}_Applying PSO after all generations")
+            #     for i in range(len(self.population.individuals)):
+            #         individual = self.population.individuals[i]
+            #         optimized_individual = self.apply_pso(individual)
+            #         self.population.individuals[i] = optimized_individual
 
             end_time = time.time()
             execution_time = end_time - start_time
 
-            if best_individual is not None and hasattr(best_individual, 'monitor'):
-                best_individual.monitor.save_event_tracer(self.config.filename['log'])
-            else:
-                print("No valid best individual or monitor to save the event tracer.")
-            return best_individual, self.crossover, self.mutation, all_generations, execution_time, self.best_time
+            # if best_individual is not None and hasattr(best_individual, 'monitor'):
+            #     best_individual.monitor.save_event_tracer(self.config.filename['log'])
+            #
+            # else:
+            #     print("No valid best individual or monitor to save the event tracer.")
+            return best_individual, self.crossover, self.mutation, all_generations, execution_time, self.best_time[-1]
 
         except Exception as e:
             print(f"Error during GA{index+1} evolution at generation {sync_generation[index]}: {str(e)}")

@@ -48,7 +48,7 @@ class Dataset:
 
         # Initialize operation data list
         self.op_data = []
-        data = pd.read_csv(file_path, sep="\t", engine='python', encoding="cp949", skiprows=[0], header=None)
+        data = pd.read_csv(file_path, sep='\t', engine='python', encoding="cp949", skiprows=[0], header=None)
 
         # Parse the operation data from the file
         for i in range(self.n_job):

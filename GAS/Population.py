@@ -241,7 +241,7 @@ class GifflerThompson:
                 best_individuals.append((optimized_individual, rule))
 
         selected_individual, selected_rule = random.choice(best_individuals)
-        print(f"selected_rule: {selected_rule}")
+        # print(f"selected_rule: {selected_rule}")
         return selected_individual
 
     def giffler_thompson(self, seq, op_data, config, priority_rule):
@@ -337,7 +337,7 @@ class Population:
     #               MIO를 위한거                  #
     ##############################################
     @classmethod
-    def from_mio(cls, config, op_data, dataset_filename, random_seed=None):
+    def from_mio(cls, config, op_data, dataset_filename, random_seed=None, percentage = 100):
         """
         Initializes a population using the MIO method.
         
@@ -355,9 +355,15 @@ class Population:
         if random_seed is not None:
             random.seed(random_seed)
             np.random.seed(random_seed)
-        individuals = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(config.population_size)]
+
+        num_MIO = int(np.trunc(config.population_size * (percentage / 100)))
+        num_RANDOM = config.population_size - num_MIO
+
+        individuals_1 = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(num_MIO)]
+        individuals_2 = [Individual(config, seq=random.sample(range(config.n_op), config.n_op), op_data=dataset.op_data) for _ in range(num_RANDOM)]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
-        population.individuals = individuals
+        print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
+        population.individuals = individuals_1 + individuals_2
         return population
 
     ##############################################  
