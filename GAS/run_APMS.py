@@ -382,7 +382,7 @@ def main(_kwargs):
 
 
 if __name__ == "__main__":
-    temp = [str(i+1) for i in range(6,20)]
+    temp = [str(i+1) for i in range(8,20)]
     instances = []
     for ins in temp:
         if len(ins)==1:
@@ -407,12 +407,20 @@ if __name__ == "__main__":
     la10: 958  15, 5/  la20: 902   10, 10
     """
 
-    optimal = [890,863,951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
+    optimal = [951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
     # optimal = [666,655,597,590,593,926,890,863,951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
     for i, ins in enumerate(instances):
         for ini in ['0', '20', '40', '60', '80', '100']:
             for seed in range(5):
-                if ins in ['07', '08', '09', '10', '11', '12', '13', '14', '15', '16'] and ini in ['0','20']:
+                if ins in ['09', '10', '11', '12', '13', '14', '15', '16'] and ini in ['0','20']:
+                    kwargs = {'_file': 'la' + ins + '.txt',
+                              '_resultfile': '../result/result.csv',
+                              '_instance': 'la' + ins,
+                              '_initialization': ini,
+                              '_seed': seed,
+                              '_optimal': optimal[i]}
+                    main(kwargs)
+                elif ins in ['17', '18', '19', '20']:
                     kwargs = {'_file': 'la' + ins + '.txt',
                               '_resultfile': '../result/result.csv',
                               '_instance': 'la' + ins,
