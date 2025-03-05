@@ -411,7 +411,8 @@ class Population:
                 individual.calculate_fitness(best, worst)
         self.individuals.sort(key=lambda x: x.fitness, reverse=True)
         # 스케일링 방법 선택 (Rank Scaling, Sigma Scaling, Boltzmann Scaling)
-        scaling_method = 'min-max'  # 'min-max', 'sigma', 'boltzmann' 등을 사용할 수 있습니다.
+        scaling_method = 'rank'  # 'min-max', 'sigma', 'boltzmann' 등을 사용할 수 있습니다.
+        # scaling_method = 'min-max'  # 'min-max', 'sigma', 'boltzmann' 등을 사용할 수 있습니다.
         if best is not None:
             if scaling_method == 'min-max':
                 self.min_max_scaling()

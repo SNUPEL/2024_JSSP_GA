@@ -184,8 +184,8 @@ class GAEngine:
 
                 # 처음에는 그냥 시작
                 self.population.evaluate(best=None)
-                print(f"GA{index+1} Population: {self.population is not None}")
-                print(f"GA{index+1} Best Individual: {best_individual is not None}")
+                # print(f"GA{index+1} Population: {self.population is not None}")
+                # print(f"GA{index+1} Best Individual: {best_individual is not None}")
 
 
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
@@ -199,12 +199,12 @@ class GAEngine:
 
                 self.population.evaluate(best=best_fitness, worst=worst_fitness)
                 # self.config.target_makespan = best_fitness
-                print(f"GA{index+1}_Best fitness at generation select crossover mutate 전 {sync_generation[index]}: {best_fitness}")
+                # print(f"GA{index+1}_Best fitness at generation select crossover mutate 전 {sync_generation[index]}: {best_fitness}")
 
                 # 동일한 makespan을 가진 개체들의 개수 세기
                 count = sum(1 for ind in self.population.individuals if ind.makespan == best_individual.makespan)
 
-                print(f"Best individual과 동일한 makespan을 가진 개체의 개수: {count}")
+                # print(f"Best individual과 동일한 makespan을 가진 개체의 개수: {count}")
 
                 # 엘리트 개체 선택
                 num_elites = int(self.elite_ratio * len(self.population.individuals))
@@ -225,7 +225,7 @@ class GAEngine:
                     
                 # 전체 population 출력
                 population_size = len(self.population.individuals)  # population의 갯수 계산
-                print(f"GA{index+1} - 전체 population After crossover (Total Population: {population_size}):")
+                # print(f"GA{index+1} - 전체 population After crossover (Total Population: {population_size}):")
 
                 self.population.evaluate(best=best_fitness, worst=worst_fitness)
 
@@ -244,7 +244,8 @@ class GAEngine:
                  
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
                 best_fitness = best_individual.makespan
-                print(f"GA{index+1}_Best fitness at generation select crossover mutate 후 {sync_generation[index]}: {best_fitness}")
+                # print(f"GA{index+1}_Best fitness at generation select crossover mutate 후 {sync_generation[index]}: {best_fitness}")
+                print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
 
                 # 상위 10% 개체를 new_populations에 저장
                 self.update_new_populations(index, new_populations)
@@ -385,11 +386,14 @@ class GAEngine:
                 # # print(f"{sync_generation[index]}: {best_fitness}, Sequence: {best_individual.seq}")
 
                 generation_data = [(ind.seq, ind.makespan) for ind in self.population.individuals]
+                convergence = sum([True if ind.makespan == best_fitness else False for ind in self.population.individuals])
                 all_generations.append((sync_generation[index], generation_data))
 
                 # 각 세대의 인구를 CSV 파일에 저장
                 save_population_to_csv(self.population, filename, sync_generation[index])
                 
+                # if best_individual is not None:
+                # if best_individual is not None and convergence >= 0.8*len(self.population.individuals):
                 if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
                     elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
                     print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")

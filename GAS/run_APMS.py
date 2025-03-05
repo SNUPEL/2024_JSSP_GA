@@ -114,10 +114,10 @@ def run_ga_engine(args):
         best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, new_populations, events, dirname=experiment_path)
         
         # GA 엔진 상태 출력
-        print(f"GA{index+1} 상태:")
-        print(f"Population: {ga_engine.population is not None}")
-        print(f"Best Individual: {best is not None}")
-        print(f"Current Generation: {sync_generation[index]}")
+        # print(f"GA{index+1} 상태:")
+        # print(f"Population: {ga_engine.population is not None}")
+        # print(f"Best Individual: {best is not None}")
+        # print(f"Current Generation: {sync_generation[index]}")
         if best is None:
             return None
 
@@ -162,23 +162,24 @@ def main(_kwargs):
     _resultfile=_kwargs['_resultfile']
     _instance=_kwargs['_instance']
     _initialization=_kwargs['_initialization']
+    _optimal = kwargs['_optimal']
     _seed=_kwargs['_seed']
 
 
     ############################################################################################
     # 1. 기본, 2. 시퀀스 이주 3. 랜덤 이주
     ############################################################################################
-    print("Starting main function...")  # 디버그 출력 추가
+    # print("Starting main function...")  # 디버그 출력 추가
 
     ############################################################################################
     # 1) file, Run_Config 조정바람
     ############################################################################################
 
     # file = 'la01.txt'
-    print(f"Loading dataset from {_file}...")  # 디버그 출력 추가
+    # print(f"Loading dataset from {_file}...")  # 디버그 출력 추가
     np.random.seed(_seed)
     random.seed(_seed)
-    print(np.random.rand())
+    # print(np.random.rand())
     dataset = Dataset(_file)
 
     # Custom GA settings    
@@ -190,10 +191,11 @@ def main(_kwargs):
                              tabu_search_iterations=10, hill_climbing_iterations=30,
                              simulated_annealing_iterations=50, two_iterations=1000)
 
-    print("Base config created...")  # 디버그 출력 추가
+    # print("Base config created...")  # 디버그 출력 추가
 
     base_config.dataset_filename = _file  # dataset 파일명 설정
-    base_config.target_makespan = _kwargs['_optimal']  # 목표 Makespan
+    base_config.target_makespan = _optimal
+    # base_config.target_makespan = _kwargs['_optimal']  # 목표 Makespan
     # base_config.target_makespan = TARGET_MAKESPAN  # 목표 Makespan
     base_config.island_mode = '1'  # Add this line to set island_mode
     # base_config.island_mode = island_mode  # Add this line to set island_mode
@@ -214,7 +216,7 @@ def main(_kwargs):
     # if not os.path.exists(ga_generations_path):
     #     os.makedirs(ga_generations_path)
 
-    print("Result directories checked/created...")  # 디버그 출력 추가
+    # print("Result directories checked/created...")  # 디버그 출력 추가
 
     '''
     crossovers
@@ -253,7 +255,8 @@ def main(_kwargs):
         # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        {'crossover': OrderCrossover, 'pc': 1.0, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
+        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
+        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': RouletteSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
 
     ]
 
@@ -291,7 +294,7 @@ def main(_kwargs):
         ##############################################
 
         ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search,
-                             pso, selective_mutation, elite_ratio=0.2, ga_engines=ga_engines, island_mode='1',
+                             pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode='1',
                              migration_frequency=MIGRATION_FREQUENCY,
                              initialization_mode=initialization_mode,
                              dataset_filename=_file,
@@ -301,7 +304,7 @@ def main(_kwargs):
 
         ga_engines.append(ga_engine)
 
-        print(f"Initialized GAEngine {i+1}")  # 디버그 출력 추가
+        # print(f"Initialized GAEngine {i+1}")  # 디버그 출력 추가
 
     best_individuals = [None] * len(ga_engines)
     stop_evolution = Manager().Value('i', 0)
@@ -316,10 +319,8 @@ def main(_kwargs):
     with Pool() as pool:
         while True:
             args = [(ga_engines[i], i, experiment_path, sync_generation, sync_lock, None, new_populations) for i in range(len(ga_engines))]
-            print("여기는 실행 안되는건가?")
 
             results = pool.map(run_ga_engine, args)
-            print("여기는 실행 안되는건가?222222")
             all_completed = True
             for result in results:
                 if result is not None:
@@ -343,10 +344,11 @@ def main(_kwargs):
                     machine_log_path = os.path.join(experiment_path, f'machine_log_GA{index+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
                     generations_path = os.path.join(experiment_path, f'ga_generations_GA{index+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
 
-                    if best.makespan <= base_config.target_makespan:
-                        stop_evolution.value = 1
-                        print(f"Stopping early as best makespan {best.makespan} is below target {base_config.target_makespan}.")
-                        break
+                    if base_config.target_makespan is not None:
+                        if best.makespan <= base_config.target_makespan:
+                            stop_evolution.value = 1
+                            print(f"Stopping early as best makespan {best.makespan} is below target {base_config.target_makespan}.")
+                            break
 
                     if os.path.exists(log_path) and os.path.exists(machine_log_path) and os.path.exists(generations_path):
                         stop_evolution.value = 1
@@ -377,22 +379,22 @@ def main(_kwargs):
 
             with open(_resultfile, 'a', newline='') as csvfile:
                 csvwriter = csv.writer(csvfile)
-                csvwriter.writerow([_instance, _initialization, _seed, best.makespan, best_time])
+                csvwriter.writerow([_instance.split('.')[0], dataset.I_b, dataset.I_f, _initialization, _seed, best.makespan, best_time])
 
 
 
 if __name__ == "__main__":
-    temp = [str(i+1) for i in range(8,20)]
-    instances = []
-    for ins in temp:
-        if len(ins)==1:
-            instances.append('0'+ins)
-        else:
-            instances.append(ins)
+    # temp = [str(i+1) for i in range(8,20)]
+    # instances = []
+    # for ins in temp:
+    #     if len(ins)==1:
+    #         instances.append('0'+ins)
+    #     else:
+    #         instances.append(ins)
 
-    with open('../result/result.csv', 'w', newline='') as csvfile:
+    with open('../result/250305.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['Problem', 'Initialization', 'Seed', 'Best Makespan', 'Best Reached Time'])
+        csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time'])
 
     """
     la01: 666  10, 5/  la11: 1222  20, 5
@@ -406,27 +408,41 @@ if __name__ == "__main__":
     la09: 951  15, 5/  la19: 842   10, 10
     la10: 958  15, 5/  la20: 902   10, 10
     """
-
-    optimal = [951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
+    root_dir = '../Data/Dataset/APMS'
+    directories = []
+    for root, _, files in os.walk(root_dir):
+        for file in files:
+            if file.endswith('.txt'):
+                directories.append(file)
+    # optimal = [951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
     # optimal = [666,655,597,590,593,926,890,863,951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
-    for i, ins in enumerate(instances):
-        for ini in ['0', '20', '40', '60', '80', '100']:
-            for seed in range(5):
-                if ins in ['09', '10', '11', '12', '13', '14', '15', '16'] and ini in ['0','20']:
-                    kwargs = {'_file': 'la' + ins + '.txt',
-                              '_resultfile': '../result/result.csv',
-                              '_instance': 'la' + ins,
-                              '_initialization': ini,
-                              '_seed': seed,
-                              '_optimal': optimal[i]}
-                    main(kwargs)
-                elif ins in ['17', '18', '19', '20']:
-                    kwargs = {'_file': 'la' + ins + '.txt',
-                              '_resultfile': '../result/result.csv',
-                              '_instance': 'la' + ins,
-                              '_initialization': ini,
-                              '_seed': seed,
-                              '_optimal': optimal[i]}
-                    main(kwargs)
-                else:
-                    pass
+    optimal={'abz5':1234,
+             'abz6':943,
+             'abz7':656,
+             'abz8':645,
+             'abz9':661,
+             'ft06':55,
+             'ft10':930,
+             'ft20':1165,
+             'ta21':1539,
+             'ta22':1511,
+             'ta31':1764,
+             'ta32':1774,
+             'ta41':1859,
+             'ta42':1867,
+             'ta51':2760,
+             'ta52':2756,
+             'ta61':2868,
+             'ta62':2869,
+             'ta71':None,
+             'ta72':None}
+    for i, ins in enumerate(directories):
+        for seed in range(5):
+            for ini in ['0', '10', '20', '40']:
+                kwargs = {'_file': 'APMS/'+ins,
+                          '_resultfile': '../result/250305.csv',
+                          '_instance': ins.split('.')[0],
+                          '_initialization': ini,
+                          '_seed': seed,
+                          '_optimal': optimal[ins.split('.')[0]]}
+                main(kwargs)
