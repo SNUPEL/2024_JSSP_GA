@@ -390,7 +390,7 @@ class GAEngine:
                 all_generations.append((sync_generation[index], generation_data))
 
                 # 각 세대의 인구를 CSV 파일에 저장
-                save_population_to_csv(self.population, filename, sync_generation[index])
+                # save_population_to_csv(self.population, filename, sync_generation[index])
                 
                 # if best_individual is not None:
                 # if best_individual is not None and convergence >= 0.8*len(self.population.individuals):
