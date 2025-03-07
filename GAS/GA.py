@@ -176,8 +176,8 @@ class GAEngine:
             best_individual = None
             best_fitness = float('inf')
             
-            base_filename = dirname+f"\\population_generations_{index+1}"
-            filename = get_next_filename(base_filename)  # 다음 사용 가능한 파일 이름을 가져옵니다.
+            # base_filename = dirname+f"\\population_generations_{index+1}"
+            # filename = get_next_filename(base_filename)  # 다음 사용 가능한 파일 이름을 가져옵니다.
 
             while sync_generation[index] < self.config.generations:
                 # print(f"GA{index+1}_Evaluating generation {sync_generation[index]}")
@@ -394,10 +394,12 @@ class GAEngine:
                 
                 # if best_individual is not None:
                 # if best_individual is not None and convergence >= 0.8*len(self.population.individuals):
-                if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
-                    elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
-                    print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
-                    print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
+                if self.config.target_makespan is not None:
+                    if best_individual.makespan <= self.config.target_makespan:
+                    # if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
+                        elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
+                        print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
+                        print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
 
                     break
 

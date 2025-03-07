@@ -256,7 +256,7 @@ def main(_kwargs):
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
-        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [TabuSearch()], 'pso': None, 'selective_mutation': None}  # APMS Setting
+        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
 
     ]
 
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     #     else:
     #         instances.append(ins)
 
-    with open('../result/250305.csv', 'w', newline='') as csvfile:
+    with open('../result/250307.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time'])
 
@@ -441,9 +441,10 @@ if __name__ == "__main__":
             for ini in ['40']:
             # for ini in ['0', '10', '20', '40']:
                 kwargs = {'_file': 'APMS/'+ins,
-                          '_resultfile': '../result/250305.csv',
+                          '_resultfile': '../result/250307.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
-                          '_optimal': optimal[ins.split('.')[0]]}
+                          '_optimal': None}
+                          # '_optimal': optimal[ins.split('.')[0]]}
                 main(kwargs)
