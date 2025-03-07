@@ -256,7 +256,7 @@ def main(_kwargs):
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
-        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': RouletteSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
+        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [TabuSearch()], 'pso': None, 'selective_mutation': None}  # APMS Setting
 
     ]
 
@@ -438,7 +438,8 @@ if __name__ == "__main__":
              'ta72':None}
     for i, ins in enumerate(directories):
         for seed in range(5):
-            for ini in ['0', '10', '20', '40']:
+            for ini in ['40']:
+            # for ini in ['0', '10', '20', '40']:
                 kwargs = {'_file': 'APMS/'+ins,
                           '_resultfile': '../result/250305.csv',
                           '_instance': ins.split('.')[0],
