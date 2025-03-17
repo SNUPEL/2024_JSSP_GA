@@ -362,7 +362,7 @@ class Population:
         individuals_1 = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(num_MIO)]
         individuals_2 = [Individual(config, seq=random.sample(range(config.n_op), config.n_op), op_data=dataset.op_data) for _ in range(num_RANDOM)]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
-        print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
+        # print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
         population.individuals = individuals_1 + individuals_2
         return population
 

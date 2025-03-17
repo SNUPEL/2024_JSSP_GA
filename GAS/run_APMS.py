@@ -164,6 +164,8 @@ def main(_kwargs):
     _initialization=_kwargs['_initialization']
     _optimal = kwargs['_optimal']
     _seed=_kwargs['_seed']
+    _record = _kwargs['_record']
+    print(f'{_instance} | seed: {_seed} | optimal: {_optimal} | RUBI ratio:{_initialization}')
 
 
     ############################################################################################
@@ -184,7 +186,7 @@ def main(_kwargs):
 
     # Custom GA settings    
     base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op,
-                             population_size=100, generations=200,
+                             population_size=100, generations=100,
                              print_console=False, save_log=True, save_machinelog=True,
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -205,10 +207,10 @@ def main(_kwargs):
     result_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'result')
     experiment_path = os.path.join(result_path, keyword)
 
-    if not os.path.exists(result_path):
-        os.makedirs(result_path)
-    if not os.path.exists(experiment_path):
-        os.makedirs(experiment_path)
+    # if not os.path.exists(result_path):
+    #     os.makedirs(result_path)
+    # if not os.path.exists(experiment_path):
+    #     os.makedirs(experiment_path)
     # if not os.path.exists(result_txt_path):
     #     os.makedirs(result_txt_path)
     # if not os.path.exists(result_gantt_path):
@@ -372,6 +374,7 @@ def main(_kwargs):
             pc = best_crossover.pc
             pm = best_mutation.pm
             # print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds")
+            print()
             print(f"Best solution for GA{i+1}",
                   f"\n\t{best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm}",
                   f"\n\tselection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}",
@@ -392,7 +395,7 @@ if __name__ == "__main__":
     #     else:
     #         instances.append(ins)
 
-    with open('../result/250307.csv', 'w', newline='') as csvfile:
+    with open('../result/250316_BSFS_seed2.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time'])
 
@@ -437,14 +440,16 @@ if __name__ == "__main__":
              'ta71':None,
              'ta72':None}
     for i, ins in enumerate(directories):
-        for seed in range(5):
-            for ini in ['40']:
+        for seed in [2]:
+            for ini in ['0', '40']:
             # for ini in ['0', '10', '20', '40']:
                 kwargs = {'_file': 'APMS/'+ins,
-                          '_resultfile': '../result/250307.csv',
+                          '_resultfile': '../result/250316_BSFS_seed2.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
-                          '_optimal': None}
+
+                          '_optimal': None,
+                          '_record':False}
                           # '_optimal': optimal[ins.split('.')[0]]}
                 main(kwargs)

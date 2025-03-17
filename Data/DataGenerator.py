@@ -30,11 +30,11 @@ def generate_JSSP_data(num_job, num_machine, prefix):
 
 def generate_bottleneckshop_data(n_job, n_machine, probability, prefix, instance):
     first_line = f"{num_job}\t{num_machine}"
-    df = pd.DataFrame(np.random.randint(11, 41, size=(num_job, num_machine)))
+    df = pd.DataFrame(np.random.randint(11, 101, size=(num_job, num_machine)))
     machine_data = []
 
     for i in range(num_job):
-        permutation = np.random.permutation(np.arange(1, num_machine + 1)).astype(int)
+        permutation = np.random.permutation(np.arange(0, num_machine)).astype(int)
         for j in range(num_machine - 1):
             if random.random() < probability:  # modifying event occurred!
                 # print('modifying event occurred!')
@@ -46,8 +46,9 @@ def generate_bottleneckshop_data(n_job, n_machine, probability, prefix, instance
                     permutation[j_position] = target
                 # print('Modified permutation:', permutation)
                 # print('-' * 30)
-        machine_data.append(permutation.tolist())
-        df.loc[df.shape[0]] = permutation
+        pmt = permutation.tolist()
+        machine_data.append([t + 1 for t in pmt])
+        df.loc[df.shape[0]] = [t + 1 for t in pmt]
 
     # Bottleneck Index
     I_bik = np.zeros((n_machine, n_machine))
@@ -76,7 +77,7 @@ def generate_bottleneckshop_data(n_job, n_machine, probability, prefix, instance
     # filename = (prefix + str(num_job) + str(num_machine) +
     #             '_' + str(round(I_b, 3)) + '_' + str(round(I_f, 3)) + '.txt')
     filename = (prefix + str(num_job) + str(num_machine) +
-                '_' + str(instance) + '.txt')
+                '_' + str(instance).zfill(2) + '.txt')
     print(f'Bottleneck Index:{round(I_b, 4)}, Flowshop Index:{round(I_f, 4)}')
     # 파일 작성
     with open(filename, 'w') as f:
@@ -88,7 +89,7 @@ def generate_bottleneckshop_data(n_job, n_machine, probability, prefix, instance
 
 def generate_flowshoplike_data(n_job, n_machine, probability, prefix, instance):
     first_line = f"{num_job}\t{num_machine}"
-    df = pd.DataFrame(np.random.randint(11, 41, size=(num_job, num_machine)))
+    df = pd.DataFrame(np.random.randint(11, 101, size=(num_job, num_machine)))
     machine_data = []
 
     for i in range(num_job):
@@ -135,7 +136,7 @@ def generate_flowshoplike_data(n_job, n_machine, probability, prefix, instance):
     # filename = (prefix + str(num_job) + str(num_machine) +
     #             '_' + str(round(I_b, 3)) + '_' + str(round(I_f, 3)) + '.txt')
     filename = (prefix + str(num_job) + str(num_machine) +
-                '_' + str(instance) + '.txt')
+                '_' + str(instance).zfill(2) + '.txt')
     print(f'Bottleneck Index:{round(I_b,4)}, Flowshop Index:{round(I_f,4)}')
     # 파일 작성
     with open(filename, 'w') as f:
@@ -146,12 +147,12 @@ def generate_flowshoplike_data(n_job, n_machine, probability, prefix, instance):
 
 
 if __name__ == "__main__":
-    num_job = 30
-    num_machine = 15
+    num_job = 10
+    num_machine = 10
     # generate_JSSP_data(num_job, num_machine, './Dataset/test_')
-    for i in range(20):
-        generate_flowshoplike_data(num_job, num_machine, 0.05*i,'./Dataset/FS_', i+1)
-        generate_bottleneckshop_data(num_job, num_machine, 0.05*i,'./Dataset/BS_', i+1)
+    for i in range(10):
+        generate_flowshoplike_data(num_job, num_machine, 0.1*i,'./Dataset/APMS/FS_', i+1)
+        generate_bottleneckshop_data(num_job, num_machine, 0.1*i,'./Dataset/APMS/BS_', i+1)
     print()
 
 # Assuming show_machine_distribution and show_pt_distribution are defined elsewhere

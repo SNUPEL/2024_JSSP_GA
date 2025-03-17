@@ -245,12 +245,14 @@ class GAEngine:
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
                 best_fitness = best_individual.makespan
                 # print(f"GA{index+1}_Best fitness at generation select crossover mutate 후 {sync_generation[index]}: {best_fitness}")
-                print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
+                # print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
 
                 # 상위 10% 개체를 new_populations에 저장
                 self.update_new_populations(index, new_populations)
                 # print(new_populations)
-
+                print(best_fitness, end=' ')
+                if sync_generation[index] % 20 == 19:
+                    print('')
 
                 # if sync_generation[index] >= 1 and sync_generation[index] % self.local_search_frequency == 0:
                 #     print(f"GA{index+1}_Applying local search")

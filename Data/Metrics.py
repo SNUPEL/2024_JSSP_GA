@@ -72,7 +72,7 @@ if __name__ == "__main__":
                 # directories.append(os.path.join(root, file))
 
     # CSV 파일 생성
-    csv_filename = "Analysis.csv"
+    csv_filename = "Analysis_250316.csv"
     with open(csv_filename, mode='w', newline='') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(["Index", "Filename", "n_job","n_machine","Bottleneck_Index", "Flowshop_Index"])  # 헤더 작성
