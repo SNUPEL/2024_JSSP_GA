@@ -164,7 +164,8 @@ def main(_kwargs):
     _initialization=_kwargs['_initialization']
     _optimal = kwargs['_optimal']
     _seed=_kwargs['_seed']
-
+    _record = _kwargs['_record']
+    print(f'{_instance} | seed: {_seed} | optimal: {_optimal} | RUBI ratio:{_initialization}')
 
     ############################################################################################
     # 1. 기본, 2. 시퀀스 이주 3. 랜덤 이주
@@ -256,7 +257,7 @@ def main(_kwargs):
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
-        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [TabuSearch()], 'pso': None, 'selective_mutation': None}  # APMS Setting
+        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
 
     ]
 
@@ -300,7 +301,8 @@ def main(_kwargs):
                              dataset_filename=_file,
                              local_search_frequency=local_search_frequency,
                              selective_mutation_frequency=selective_mutation_frequency,
-                             random_seed=_seed)
+                             random_seed=_seed,
+                             record=_record)
 
         ga_engines.append(ga_engine)
 
@@ -372,6 +374,7 @@ def main(_kwargs):
             pc = best_crossover.pc
             pm = best_mutation.pm
             # print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds")
+            print()
             print(f"Best solution for GA{i+1}",
                   f"\n\t{best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm}",
                   f"\n\tselection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}",
@@ -437,13 +440,15 @@ if __name__ == "__main__":
              'ta71':None,
              'ta72':None}
     for i, ins in enumerate(directories):
-        for seed in range(5):
-            for ini in ['40']:
-            # for ini in ['0', '10', '20', '40']:
+        for seed in range(3,5):
+            # for ini in ['0']:
+            for ini in ['0','20', '40','100']:
                 kwargs = {'_file': 'APMS/'+ins,
                           '_resultfile': '../result/250305.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
-                          '_optimal': optimal[ins.split('.')[0]]}
+                          '_optimal': optimal[ins.split('.')[0]],
+                          '_record':True if seed == 0 else False}
                 main(kwargs)
+

@@ -103,7 +103,7 @@ class GAEngine:
     def __init__(self, config, op_data, crossover, mutation, selection, local_search=None, pso=None,
                  selective_mutation=None, elite_ratio=0.1, ga_engines=None, island_mode=1,
                  migration_frequency=10, initialization_mode='1', dataset_filename=None, initial_population=None,
-                 local_search_frequency=2, selective_mutation_frequency=10, random_seed=None):
+                 local_search_frequency=2, selective_mutation_frequency=10, random_seed=None, record=False):
         """
         Initializes the GA engine with the given parameters.
         
@@ -146,6 +146,7 @@ class GAEngine:
         self.local_search_frequency = local_search_frequency
         self.selective_mutation_frequency = selective_mutation_frequency
         self.random_seed = random_seed
+        self.record = record
 
         self.local_search_top_percentage = 0.01
 
@@ -245,8 +246,10 @@ class GAEngine:
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
                 best_fitness = best_individual.makespan
                 # print(f"GA{index+1}_Best fitness at generation select crossover mutate 후 {sync_generation[index]}: {best_fitness}")
-                print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
-
+                # print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
+                print(best_fitness,end=' ')
+                if sync_generation[index]%20 == 19:
+                    print('')
                 # 상위 10% 개체를 new_populations에 저장
                 self.update_new_populations(index, new_populations)
                 # print(new_populations)
@@ -390,7 +393,8 @@ class GAEngine:
                 all_generations.append((sync_generation[index], generation_data))
 
                 # 각 세대의 인구를 CSV 파일에 저장
-                # save_population_to_csv(self.population, filename, sync_generation[index])
+                if self.record:
+                    save_population_to_csv(self.population, filename, sync_generation[index])
                 
                 # if best_individual is not None:
                 # if best_individual is not None and convergence >= 0.8*len(self.population.individuals):
