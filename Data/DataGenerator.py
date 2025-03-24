@@ -77,7 +77,7 @@ def generate_bottleneckshop_data(n_job, n_machine, probability, prefix, instance
     # filename = (prefix + str(num_job) + str(num_machine) +
     #             '_' + str(round(I_b, 3)) + '_' + str(round(I_f, 3)) + '.txt')
     filename = (prefix + str(num_job) + str(num_machine) +
-                '_' + str(instance).zfill(2) + '.txt')
+                '_' + str(instance).zfill(3) + '.txt')
     print(f'Bottleneck Index:{round(I_b, 4)}, Flowshop Index:{round(I_f, 4)}')
     # 파일 작성
     with open(filename, 'w') as f:
@@ -136,7 +136,7 @@ def generate_flowshoplike_data(n_job, n_machine, probability, prefix, instance):
     # filename = (prefix + str(num_job) + str(num_machine) +
     #             '_' + str(round(I_b, 3)) + '_' + str(round(I_f, 3)) + '.txt')
     filename = (prefix + str(num_job) + str(num_machine) +
-                '_' + str(instance).zfill(2) + '.txt')
+                '_' + str(instance).zfill(3) + '.txt')
     print(f'Bottleneck Index:{round(I_b,4)}, Flowshop Index:{round(I_f,4)}')
     # 파일 작성
     with open(filename, 'w') as f:
@@ -147,12 +147,12 @@ def generate_flowshoplike_data(n_job, n_machine, probability, prefix, instance):
 
 
 if __name__ == "__main__":
-    num_job = 10
-    num_machine = 10
+    num_job = 20
+    num_machine = 20
     # generate_JSSP_data(num_job, num_machine, './Dataset/test_')
-    for i in range(10):
-        generate_flowshoplike_data(num_job, num_machine, 0.1*i,'./Dataset/APMS/FS_', i+1)
-        generate_bottleneckshop_data(num_job, num_machine, 0.1*i,'./Dataset/APMS/BS_', i+1)
+    for i in range(100):
+        generate_flowshoplike_data(num_job, num_machine, 0.01*i,'./Dataset/APMS/FS_', i+1)
+        generate_bottleneckshop_data(num_job, num_machine, 0.01*i,'./Dataset/APMS/BS_', i+1)
     print()
 
 # Assuming show_machine_distribution and show_pt_distribution are defined elsewhere

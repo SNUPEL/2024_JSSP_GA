@@ -104,52 +104,8 @@ ft20 = 1165
 # TARGET_MAKESPAN = 666  # 목표 Makespan
 MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
 # random_seed = None  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
+from GAS.Population import Population
 
-
-
-def run_ga_engine(args):
-    ga_engine, index, experiment_path, sync_generation, sync_lock, events, new_populations = args
-    try:
-        # evolve 함수 호출 시 new_populations 전달
-        best, best_crossover, best_mutation, all_generations, execution_time, best_time = ga_engine.evolve(index, sync_generation, sync_lock, new_populations, events, dirname=experiment_path)
-        
-        # GA 엔진 상태 출력
-        # print(f"GA{index+1} 상태:")
-        # print(f"Population: {ga_engine.population is not None}")
-        # print(f"Best Individual: {best is not None}")
-        # print(f"Current Generation: {sync_generation[index]}")
-        if best is None:
-            return None
-
-        # crossover_name = best_crossover.__class__.__name__
-        # mutation_name = best_mutation.__class__.__name__
-        # selection_name = ga_engine.selection.__class__.__name__
-        # local_search_names = [ls.__class__.__name__ for ls in ga_engine.local_search]
-        # local_search_name = "_".join(local_search_names)
-        # pso_name = ga_engine.pso.__class__.__name__ if ga_engine.pso else 'None'
-        # pc = best_crossover.pc
-        # pm = best_mutation.pm
-
-        # now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        # log_path = os.path.join(result_txt_path, f'log_GA{index+1}_{now}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
-        # machine_log_path = os.path.join(result_txt_path, f'machine_log_GA{index+1}_{now}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
-        # generations_path = os.path.join(ga_generations_path, f'ga_generations_GA{index+1}_{now}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
-
-        # if best is not None and hasattr(best, 'monitor'):
-        #     best.monitor.save_event_tracer(log_path)
-        #     ga_engine.config.filename['log'] = log_path
-        #     generated_log_df = generate_machine_log(ga_engine.config)
-        #     generated_log_df.to_csv(machine_log_path, index=False)
-        #     ga_engine.save_csv(all_generations, execution_time, generations_path)
-        # else:
-        #     print("No valid best individual or monitor to save the event tracer.")
-
-        return best, best_crossover, best_mutation, all_generations, execution_time, best_time, index
-    except Exception as e:
-        import traceback
-        traceback.print_exc()  # 트레이스백 출력
-        print(f"Exception in GA {index+1}: {e}")
-        return None
 
 
 
@@ -168,17 +124,6 @@ def main(_kwargs):
     print(f'{_instance} | seed: {_seed} | optimal: {_optimal} | RUBI ratio:{_initialization}')
 
 
-    ############################################################################################
-    # 1. 기본, 2. 시퀀스 이주 3. 랜덤 이주
-    ############################################################################################
-    # print("Starting main function...")  # 디버그 출력 추가
-
-    ############################################################################################
-    # 1) file, Run_Config 조정바람
-    ############################################################################################
-
-    # file = 'la01.txt'
-    # print(f"Loading dataset from {_file}...")  # 디버그 출력 추가
     np.random.seed(_seed)
     random.seed(_seed)
     # print(np.random.rand())
@@ -193,198 +138,13 @@ def main(_kwargs):
                              tabu_search_iterations=10, hill_climbing_iterations=30,
                              simulated_annealing_iterations=50, two_iterations=1000)
 
-    # print("Base config created...")  # 디버그 출력 추가
-
-    base_config.dataset_filename = _file  # dataset 파일명 설정
-    base_config.target_makespan = _optimal
-    # base_config.target_makespan = _kwargs['_optimal']  # 목표 Makespan
-    # base_config.target_makespan = TARGET_MAKESPAN  # 목표 Makespan
-    base_config.island_mode = '1'  # Add this line to set island_mode
-    # base_config.island_mode = island_mode  # Add this line to set island_mode
-    keyword = _instance+"-"+_initialization
-    # now = datetime.datetime.now().strftime('%m-%d-%H-%M-%S') + '-'+_instance+"-Mode"+_initialization
-
-    result_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'result')
-    experiment_path = os.path.join(result_path, keyword)
-
-    # if not os.path.exists(result_path):
-    #     os.makedirs(result_path)
-    # if not os.path.exists(experiment_path):
-    #     os.makedirs(experiment_path)
-    # if not os.path.exists(result_txt_path):
-    #     os.makedirs(result_txt_path)
-    # if not os.path.exists(result_gantt_path):
-    #     os.makedirs(result_gantt_path)
-    # if not os.path.exists(ga_generations_path):
-    #     os.makedirs(ga_generations_path)
-
-    # print("Result directories checked/created...")  # 디버그 출력 추가
-
-    '''
-    crossovers
-    [OrderCrossover, PMXCrossover, LOXCrossover, OBC, 
-    PositionBasedCrossover, SXX,PSXCrossover,POXCrossover,CXCrossover,CX_RandomCrossover,CompositeCrossover]  # Crossover 리스트
-    '''
-
-    '''
-    mutations 
-    [GeneralMutation, DisplacementMutation, InsertionMutation, 
-    ReciprocalExchangeMutation,ShiftMutation, InversionMutation, SwapMutation,DiverseSwapMutation]
-    '''
-
-    '''
-    selection 
-    [TournamentSelection(), SeedSelection(), RouletteSelection(),DiverseTournamentSelection()]
-    '''
-
-    '''
-    Local Search
-    [HillClimbing(), TabuSearch(), SimulatedAnnealing(), GifflerThompson(),TwoOptLocalSearch(),SimulatedAnnealing_insert()] # Local Search 리스트
-    GifflerThompson(priority_rule='SPT') -> SPT, LPT, MWR, LWR, MOR, LOR, EDD, FCFS, RANDOM
-    '''
-
-    '''
-    Meta Heuristic
-    ['pso': PSO(num_particles=10, num_iterations=50)], 'pso': None  # PSO 추가
-    '''
-
-
-    ############################################################################################
-    # 1) crossover, mutation,selection 종류 선택 및 확률 조정
-    ############################################################################################
-
-    custom_settings = [
-        # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
-        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
-        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
-
-    ]
-
-    ga_engines = []
-    for i, setting in enumerate(custom_settings):
-        crossover_class = setting['crossover']
-        mutation_class = setting['mutation']
-        selection_instance = setting['selection']
-        # selection_instance.elite_TS = setting['elite_TS']  # 여기에 설정합니다.
-        local_search_methods = setting['local_search']
-        pso_class = setting.get('pso')
-        selective_mutation_instance = setting['selective_mutation']
-        pc = setting['pc']
-        pm = setting['pm']
-
-        initialization_mode = _initialization
-        # initialization_mode = '1'
-        # initialization_mode = input(f"Select Initialization GA mode for GA{i+1} (1: basic, 2: MIO, 3: GifflerThompson): ")
-        # print(f"Selected Initialization GA mode for GA{i+1}: {initialization_mode}")
-
-        config = copy.deepcopy(base_config)
-        config.ga_index = i + 1
-
-        crossover = crossover_class(pc=pc)
-        mutation = mutation_class(pm=pm)
-        selection = selection_instance
-        pso = pso_class if pso_class else None
-        local_search = local_search_methods
-        local_search_frequency = 100000
-        selective_mutation_frequency = 100000
-        selective_mutation = selective_mutation_instance
-
-        ##############################################
-        # elite_ratio 설정: 0.1이면 10%
-        ##############################################
-
-        ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search,
-                             pso, selective_mutation, elite_ratio=0.1, ga_engines=ga_engines, island_mode='1',
-                             migration_frequency=MIGRATION_FREQUENCY,
-                             initialization_mode=initialization_mode,
-                             dataset_filename=_file,
-                             local_search_frequency=local_search_frequency,
-                             selective_mutation_frequency=selective_mutation_frequency,
-                             random_seed=_seed)
-
-        ga_engines.append(ga_engine)
-
-        # print(f"Initialized GAEngine {i+1}")  # 디버그 출력 추가
-
-    best_individuals = [None] * len(ga_engines)
-    stop_evolution = Manager().Value('i', 0)
-    elite_population = Manager().list([None] * len(ga_engines))
-
-    manager = Manager()
-    new_populations = manager.list([[] for _ in range(len(ga_engines))])  # Manager를 통한 공유 리스트
-
-    sync_generation = manager.list([0] * len(ga_engines))
-    sync_lock = manager.Lock()
-
-    with Pool() as pool:
-        while True:
-            args = [(ga_engines[i], i, experiment_path, sync_generation, sync_lock, None, new_populations) for i in range(len(ga_engines))]
-
-            results = pool.map(run_ga_engine, args)
-            all_completed = True
-            for result in results:
-                if result is not None:
-                    best, best_crossover, best_mutation, all_generations, execution_time, best_time, index = result
-                    best_individuals[index] = (best, best_crossover, best_mutation, execution_time, best_time, all_generations)
-                    elite_population[index] = best
-
-                    # 세대가 끝날 때마다 상위 10% 개체를 new_populations에 저장
-                    top_individuals = sorted(ga_engines[index].population.individuals, key=lambda ind: ind.makespan)[:max(1, len(ga_engines[index].population.individuals) // 10)]
-                    new_populations[index] = [copy.deepcopy(ind) for ind in top_individuals]
-
-                    crossover_name = best_crossover.__class__.__name__
-                    mutation_name = best_mutation.__class__.__name__
-                    selection_name = ga_engines[index].selection.__class__.__name__
-                    local_search_names = [ls.__class__.__name__ for ls in ga_engines[index].local_search]
-                    local_search_name = "_".join(local_search_names)
-                    pso_name = ga_engines[index].pso.__class__.__name__ if ga_engines[index].pso else 'None'
-                    pc = best_crossover.pc
-                    pm = best_mutation.pm
-                    log_path = os.path.join(experiment_path, f'log_GA{index+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
-                    machine_log_path = os.path.join(experiment_path, f'machine_log_GA{index+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
-                    generations_path = os.path.join(experiment_path, f'ga_generations_GA{index+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
-
-                    if base_config.target_makespan is not None:
-                        if best.makespan <= base_config.target_makespan:
-                            stop_evolution.value = 1
-                            print(f"Stopping early as best makespan {best.makespan} is below target {base_config.target_makespan}.")
-                            break
-
-                    if os.path.exists(log_path) and os.path.exists(machine_log_path) and os.path.exists(generations_path):
-                        stop_evolution.value = 1
-                        print(f"Stopping as all files for GA{index+1} are generated.")
-                        break
-                else:
-                    all_completed = False
-
-            if stop_evolution.value or all_completed:
-                break
-
-    for i, result in enumerate(best_individuals):
-        if result is not None:
-            best, best_crossover, best_mutation, execution_time, best_time, all_generations = result
-            crossover_name = best_crossover.__class__.__name__
-            mutation_name = best_mutation.__class__.__name__
-            selection_name = ga_engines[i].selection.__class__.__name__
-            local_search_names = [ls.__class__.__name__ for ls in ga_engines[i].local_search]
-            local_search_name = "_".join(local_search_names)
-            pso_name = ga_engines[i].pso.__class__.__name__ if ga_engines[i].pso else 'None'
-            pc = best_crossover.pc
-            pm = best_mutation.pm
-            # print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds")
-            print()
-            print(f"Best solution for GA{i+1}",
-                  f"\n\t{best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm}",
-                  f"\n\tselection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}",
-                  f"\n\tTime taken: {execution_time:.2f} seconds, First best time: {best_time:.2f} seconds")
-
-            with open(_resultfile, 'a', newline='') as csvfile:
-                csvwriter = csv.writer(csvfile)
-                csvwriter.writerow([_instance.split('.')[0], dataset.I_b, dataset.I_f, _initialization, _seed, best.makespan, best_time])
-
-
+    pop = Population.from_mio(base_config, dataset.op_data, _file, random_seed=_seed, percentage=int(_initialization))
+    makespans = [individual.makespan for individual in pop.individuals]
+    min_makespan = min(makespans)
+    avg_makespan = sum(makespans) / len(makespans) if makespans else 0
+    with open(_resultfile, 'a', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow([_instance.split('.')[0], dataset.I_b, dataset.I_f, _initialization, _seed, min_makespan, avg_makespan])
 
 if __name__ == "__main__":
     # temp = [str(i+1) for i in range(8,20)]
@@ -395,9 +155,9 @@ if __name__ == "__main__":
     #     else:
     #         instances.append(ins)
 
-    with open('../result/250316_BSFS_seed2.csv', 'w', newline='') as csvfile:
+    with open('../result/250318_initialization_100.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time'])
+        csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Mean Makespan'])
 
     """
     la01: 666  10, 5/  la11: 1222  20, 5
@@ -441,10 +201,11 @@ if __name__ == "__main__":
              'ta72':None}
     for i, ins in enumerate(directories):
         for seed in [2]:
-            for ini in ['0', '40']:
+            for ini in ['0', '100']:
             # for ini in ['0', '10', '20', '40']:
                 kwargs = {'_file': 'APMS/'+ins,
-                          '_resultfile': '../result/250316_BSFS_seed2.csv',
+                # kwargs = {'_file': 'APMS/'+ins,
+                          '_resultfile': '../result/250318_initialization_100.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
