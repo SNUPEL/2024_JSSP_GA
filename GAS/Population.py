@@ -22,7 +22,7 @@ import random
 from GAS.Individual import Individual
 from Data.Dataset.Dataset import Dataset
 
-print_console = False
+print_console = True
 
 ############################################################################################
 # Operation, MIOMachine, JSSP은 MIO를 위한거
@@ -104,12 +104,12 @@ class JSSP:
         op_list (list): List of operations.
         machine_list (list): List of machines.
     """
-    def __init__(self, dataset):
+    def __init__(self, dataset, print_console=False):
         self.dataset = dataset
         self.op_data = dataset.op_data
         self.op_list = [[] for _ in range(self.dataset.n_job)]
         self.machine_list = [MIOMachine(i, dataset.n_machine) for i in range(self.dataset.n_machine)]
-
+        self.print_console = print_console
         # Initialization
         for i in range(self.dataset.n_job):
             for j in range(self.dataset.n_machine):
@@ -143,26 +143,26 @@ class JSSP:
                     self.ready.append(self.op_list[i][j])
 
         while len(self.seq) < self.dataset.n_op:
-            if print_console: print('1. 현재 대기중인 작업 : ', [op.idx for op in self.ready])
+            if self.print_console: print('1. 현재 대기중인 작업 : ', [op.idx for op in self.ready])
             random.shuffle(self.ready)
             op = self.ready.pop()
-            if print_console: print('2. 결정된 작업 : ', (op.job, op.precedence))
+            if self.print_console: print('2. 결정된 작업 : ', (op.job, op.precedence))
             self.seq.append(op)
 
             if op.precedence != self.dataset.n_machine - 1:
-                if print_console: print('3. 현재까지 형성된 sequence : ', [op.idx for op in self.seq])
-                if print_console: print('3-1. sequence 길이 :', len(self.seq))
+                if self.print_console: print('3. 현재까지 형성된 sequence : ', [op.idx for op in self.seq])
+                if self.print_console: print('3-1. sequence 길이 :', len(self.seq))
 
                 op.op_following.job_ready = True
-                if print_console: print('4. 같은 job의 다음 operation의 작업 가능 현황 : ',
+                if self.print_console: print('4. 같은 job의 다음 operation의 작업 가능 현황 : ',
                                         (op.op_following.job_ready, op.op_following.machine_ready))
 
-                if print_console: print('5-1. machine의 ready list 수정 전 : ', [op.idx for op in op.machine.op_ready])
+                if self.print_console: print('5-1. machine의 ready list 수정 전 : ', [op.idx for op in op.machine.op_ready])
                 
                 # Check if op is in op_ready before removing
                 if op in op.machine.op_ready:
                     op.machine.op_ready.remove(op)
-                    if print_console: print('5-2. machine의 ready list 수정 후 : ', [op.idx for op in op.machine.op_ready])
+                    if self.print_console: print('5-2. machine의 ready list 수정 후 : ', [op.idx for op in op.machine.op_ready])
                 else:
                     print(f"Error: Operation {op.idx} not found in machine {op.machine.id} op_ready list")
                     print(f"Current op_ready list: {[op.idx for op in op.machine.op_ready]}")
@@ -174,19 +174,20 @@ class JSSP:
                 if op.op_following.job_ready and op.op_following.machine_ready:
                     if op.op_following not in self.ready:
                         self.ready.append(op.op_following)
-                        if print_console: print('6. Job 진행으로 인해 새롭게 ready list에 추가되는 작업 : ',
+                        if self.print_console: print('6. Job 진행으로 인해 새롭게 ready list에 추가되는 작업 : ',
                                                 (op.op_following.job, op.op_following.precedence))
 
                 for x in op.machine.op_ready:
                     if x.job_ready and x.machine_ready:
                         if x not in self.ready:
                             self.ready.append(x)
-                            if print_console: print('7. Machine 진행으로 인해 새롭게 ready list에 추가되는 작업 : ',
+                            if self.print_console: print('7. Machine 진행으로 인해 새롭게 ready list에 추가되는 작업 : ',
                                                     (x.idx))
 
         s = [op.idx for op in self.seq]
         self.__init__(self.dataset)
         return s
+
 
 ############################################################################################
 # GifflerThompson으로써 각종 휴리스틱
