@@ -102,7 +102,7 @@ ft20 = 1165
 
 # # Configuration for target makespan and migration frequency
 # TARGET_MAKESPAN = 666  # 목표 Makespan
-# MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
+MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
 # random_seed = 2 # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
 # random_seed = None  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
 
@@ -154,7 +154,7 @@ def run_ga_engine(args):
 
 
 
-def main(filename, random_seed, target_makespan):
+def main(kwargs):
     """
     Main function to setup and execute the GA engines.
     """
@@ -172,13 +172,21 @@ def main(filename, random_seed, target_makespan):
     ############################################################################################
     # 1) file, Run_Config 조정바람
     ############################################################################################
-
+    # kwargs = {'_file': ins,
+    #           # kwargs = {'_file': 'APMS/'+ins,
+    #           '_resultfile': '../result/250407.csv',
+    #           '_instance': ins.split('.')[0],
+    #           '_initialization': ini,
+    #           '_seed': seed,
+    #           '_optimal': optimal[i],
+    #           # '_optimal': optimal[ins.split('.')[0]],
+    #           '_record': True if seed == 0 else False}
     # file = 'la01.txt'
-    print(f"Loading dataset from {filename}...")  # 디버그 출력 추가
-    dataset = Dataset(filename)
-
+    print(f"Loading dataset from {ins}...")  # 디버그 출력 추가
+    dataset = Dataset(ins)
+    random_seed = kwargs['_seed']
     # Custom GA settings    
-    base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op, population_size=100, generations=400,
+    base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op, population_size=100, generations=4,
                              print_console=False, save_log=True, save_machinelog=True, 
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -186,9 +194,9 @@ def main(filename, random_seed, target_makespan):
     
     print("Base config created...")  # 디버그 출력 추가
 
-    base_config.dataset_filename = filename  # dataset 파일명 설정
-    base_config.target_makespan = target_makespan  # 목표 Makespan
-    base_config.island_mode = island_mode  # Add this line to set island_mode
+    base_config.dataset_filename = ins  # dataset 파일명 설정
+    base_config.target_makespan = kwargs['_optimal']  # 목표 Makespan
+    base_config.island_mode = 1  # Add this line to set island_mode
 
     result_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'result')
     result_txt_path = os.path.join(result_path, 'result_txt')
@@ -257,7 +265,7 @@ def main(filename, random_seed, target_makespan):
         pc = setting['pc']
         pm = setting['pm']
 
-        initialization_mode = '2'
+        initialization_mode = kwargs['_initialization']
         # initialization_mode = input(f"Select Initialization GA mode for GA{i+1} (1: basic, 2: MIO, 3: GifflerThompson): ")
         print(f"Selected Initialization GA mode for GA{i+1}: {initialization_mode}")
 
@@ -282,12 +290,13 @@ def main(filename, random_seed, target_makespan):
                                                                                                                         # elite_ratio 설정: 0.1이면 10%
                                                                                                                         ##############################################
 
-        if initialization_mode == '1':
+        if initialization_mode == '0':
+        # if initialization_mode == '1':
             ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.02, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
-        elif initialization_mode == '2':
-            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.02, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='2', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
-        elif initialization_mode == '3':
-            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.02, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='3', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
+        elif initialization_mode in ['20', '40', '60', '80', '100']:
+            ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.02, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode=initialization_mode, dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
+        # elif initialization_mode == '3':
+        #     ga_engine = GAEngine(config, dataset.op_data, crossover, mutation, selection, local_search, pso, selective_mutation, elite_ratio=0.02, ga_engines=ga_engines, island_mode=island_mode, migration_frequency=MIGRATION_FREQUENCY, initialization_mode='3', dataset_filename=config.dataset_filename, local_search_frequency=local_search_frequency, selective_mutation_frequency=selective_mutation_frequency, random_seed=random_seed)
         
         ga_engines.append(ga_engine)
 
@@ -351,9 +360,9 @@ def main(filename, random_seed, target_makespan):
                     else:
                         print("No valid best individual or monitor to save the event tracer.")
 
-                    if best.makespan <= TARGET_MAKESPAN:
+                    if best.makespan <= kwargs['_optimal']:
                         stop_evolution.value = 1
-                        print(f"Stopping early as best makespan {best.makespan} is below target {TARGET_MAKESPAN}.")
+                        print(f"Stopping early as best makespan {best.makespan} is below target {kwargs['_optimal']}.")
                         break
 
                     if os.path.exists(log_path) and os.path.exists(machine_log_path) and os.path.exists(generations_path):
@@ -377,7 +386,7 @@ def main(filename, random_seed, target_makespan):
             pso_name = ga_engines[i].pso.__class__.__name__ if ga_engines[i].pso else 'None'
             pc = best_crossover.pc
             pm = best_mutation.pm
-            print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds, First best time: {best_time:.2f} seconds")
+            # print(f"Best solution for GA{i+1}: {best} using {crossover_name} with pc={pc} and {mutation_name} with pm={pm} and selection: {selection_name} and Local Search: {local_search_name} and pso: {pso_name}, Time taken: {execution_time:.2f} seconds, First best time: {best_time:.2f} seconds")
             machine_log_path = os.path.join(result_txt_path, f'machine_log_GA{i+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.csv')
             gantt_path = os.path.join(result_gantt_path, f'gantt_chart_GA{i+1}_{crossover_name}_{mutation_name}_{selection_name}_{local_search_name}_{pso_name}_pc{pc}_pm{pm}.png')
             if os.path.exists(machine_log_path):
@@ -388,6 +397,50 @@ def main(filename, random_seed, target_makespan):
                 print(f"Warning: {machine_log_path} does not exist.")
 
 if __name__ == "__main__":
+
+    with open('../result/250407.csv', 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time'])
+
+    """
+    la01: 666  10, 5/  la11: 1222  20, 5
+    la02: 655  10, 5/  la12: 1039  20, 5
+    la03: 597  10, 5/  la13: 1150  20, 5
+    la04: 590  10, 5/  la14: 1292  20, 5
+    la05: 593  10, 5/  la15: 1207  20, 5
+    la06: 926  15, 5/  la16: 945   10, 10
+    la07: 890  15, 5/  la17: 784   10, 10
+    la08: 863  15, 5/  la18: 848   10, 10
+    la09: 951  15, 5/  la19: 842   10, 10
+    la10: 958  15, 5/  la20: 902   10, 10
+    """
+    # root_dir = '../Data/Dataset/APMS'
+    # directories = []
+    # for root, _, files in os.walk(root_dir):
+    #     for file in files:
+    #         if file.endswith('.txt'):
+    #             directories.append(file)
+    directories = ['la16.txt',
+                   'la18.txt',
+                   'la19.txt',
+                   'la20.txt']
+    optimal = [945, 848, 842, 902]
+    for i, ins in enumerate(directories):
+        for seed in range(5):
+            # for ini in ['0']:
+            for ini in ['40', '60', '80', '100']:
+            # for ini in ['0', '20', '40', '60', '80', '100']:
+                kwargs = {'_file': ins,
+                          # kwargs = {'_file': 'APMS/'+ins,
+                          '_resultfile': '../result/250407.csv',
+                          '_instance': ins.split('.')[0],
+                          '_initialization': ini,
+                          '_seed': seed,
+                          '_optimal': optimal[i],
+                          # '_optimal': optimal[ins.split('.')[0]],
+                          '_record': True if seed == 0 else False}
+                main(kwargs)
+
     """
     la01: 666  10, 5/  la11: 1222  20, 5
 la02: 655  10, 5/  la12: 1039  20, 5
@@ -400,15 +453,15 @@ la08: 863  15, 5/  la18: 848   10, 10
 la09: 951  15, 5/  la19: 842   10, 10
 la10: 958  15, 5/  la20: 902   10, 10
 """
-    data_list = ['la16.txt',
-            'la18.txt',
-            'la19.txt',
-            'la20.txt'
-            ]
-    target_makespan_list = [945, 848, 842, 902]
-    for idx, data in enumerate(data_list):
-        for seed in range(5):
-            # TARGET_MAKESPAN = target_makespan_list[idx]  # 목표 Makespan
-            MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
-            random_seed = seed  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
-            main(data, seed, target_makespan_list[idx])
+    # data_list = ['la16.txt',
+    #         'la18.txt',
+    #         'la19.txt',
+    #         'la20.txt'
+    #         ]
+    # target_makespan_list = [945, 848, 842, 902]
+    # for idx, data in enumerate(data_list):
+    #     for seed in range(5):
+    #         # TARGET_MAKESPAN = target_makespan_list[idx]  # 목표 Makespan
+    #         MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
+    #         random_seed = seed  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
+    #         main(data, seed, target_makespan_list[idx])

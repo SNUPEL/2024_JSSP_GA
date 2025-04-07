@@ -338,7 +338,7 @@ class Population:
     #               MIO를 위한거                  #
     ##############################################
     @classmethod
-    def from_mio(cls, config, op_data, dataset_filename, random_seed=None):
+    def from_mio(cls, config, op_data, dataset_filename, random_seed=None, num=0):
         """
         Initializes a population using the MIO method.
         
@@ -356,9 +356,11 @@ class Population:
         if random_seed is not None:
             random.seed(random_seed)
             np.random.seed(random_seed)
-        individuals = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(config.population_size)]
+        individuals1 = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(num)]
+        individuals2 = [Individual(config, seq=random.sample(range(config.n_op), config.n_op), op_data=dataset.op_data) for _ in range(config.population_size-num)]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
-        population.individuals = individuals
+        population.individuals = individuals1+individuals2
+        print(num,"개의 MIO individuals 와 ",(config.population_size-num),"개의 Random individuals 가 생성되었습니다!")
         return population
 
     ##############################################  

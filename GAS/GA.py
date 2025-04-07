@@ -143,9 +143,10 @@ class GAEngine:
         self.selective_mutation_frequency = selective_mutation_frequency
         self.random_seed = random_seed
         self.local_search_top_percentage = 0.01  
-
-        if initialization_mode == '2':
-            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
+        if initialization_mode == '0':
+            self.population = Population(config, op_data, random_seed=random_seed)
+        if initialization_mode in ['20', '40', '60', '80', '100']:
+            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed, num=int(initialization_mode))
         elif initialization_mode == '3':
             self.population = Population.from_giffler_thompson(config, op_data, dataset_filename, random_seed=random_seed)
         else:
