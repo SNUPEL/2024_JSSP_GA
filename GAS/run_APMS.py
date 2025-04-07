@@ -185,7 +185,7 @@ def main(_kwargs):
 
     # Custom GA settings    
     base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op,
-                             population_size=100, generations=200,
+                             population_size=100, generations=400,
                              print_console=False, save_log=True, save_machinelog=True,
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -257,7 +257,7 @@ def main(_kwargs):
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': TournamentSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
-        {'crossover': OrderCrossover, 'pc': 0.9, 'mutation': CompositeMutation, 'pm': 0.9, 'selection': RouletteSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
+        {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 1.0, 'selection': SeedSelection(), 'local_search': [], 'pso': None, 'selective_mutation': None}  # APMS Setting
 
     ]
 
@@ -395,7 +395,7 @@ if __name__ == "__main__":
     #     else:
     #         instances.append(ins)
 
-    with open('../result/250305.csv', 'w', newline='') as csvfile:
+    with open('../result/250406.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['Problem', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time'])
 
@@ -412,43 +412,49 @@ if __name__ == "__main__":
     la10: 958  15, 5/  la20: 902   10, 10
     """
     root_dir = '../Data/Dataset/APMS'
-    directories = []
-    for root, _, files in os.walk(root_dir):
-        for file in files:
-            if file.endswith('.txt'):
-                directories.append(file)
-    # optimal = [951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
+    # directories = []
+    # for root, _, files in os.walk(root_dir):
+    #     for file in files:
+    #         if file.endswith('.txt'):
+    #             directories.append(file)
+    directories=['la16.txt',
+                 'la18.txt',
+                 'la19.txt',
+                 'la20.txt']
+    optimal = [945,848,842,902]
     # optimal = [666,655,597,590,593,926,890,863,951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
-    optimal={'abz5':1234,
-             'abz6':943,
-             'abz7':656,
-             'abz8':645,
-             'abz9':661,
-             'ft06':55,
-             'ft10':930,
-             'ft20':1165,
-             'ta21':1539,
-             'ta22':1511,
-             'ta31':1764,
-             'ta32':1774,
-             'ta41':1859,
-             'ta42':1867,
-             'ta51':2760,
-             'ta52':2756,
-             'ta61':2868,
-             'ta62':2869,
-             'ta71':None,
-             'ta72':None}
+    # optimal={'abz5':1234,
+    #          'abz6':943,
+    #          'abz7':656,
+    #          'abz8':645,
+    #          'abz9':661,
+    #          'ft06':55,
+    #          'ft10':930,
+    #          'ft20':1165,
+    #          'ta21':1539,
+    #          'ta22':1511,
+    #          'ta31':1764,
+    #          'ta32':1774,
+    #          'ta41':1859,
+    #          'ta42':1867,
+    #          'ta51':2760,
+    #          'ta52':2756,
+    #          'ta61':2868,
+    #          'ta62':2869,
+    #          'ta71':None,
+    #          'ta72':None}
     for i, ins in enumerate(directories):
-        for seed in range(3,5):
+        for seed in range(5):
             # for ini in ['0']:
-            for ini in ['0','20', '40','100']:
-                kwargs = {'_file': 'APMS/'+ins,
-                          '_resultfile': '../result/250305.csv',
+            for ini in ['0','20','40','60','80','100']:
+                kwargs = {'_file': ins,
+                # kwargs = {'_file': 'APMS/'+ins,
+                          '_resultfile': '../result/250405.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
-                          '_optimal': optimal[ins.split('.')[0]],
+                          '_optimal': optimal[i],
+                          # '_optimal': optimal[ins.split('.')[0]],
                           '_record':True if seed == 0 else False}
                 main(kwargs)
 
