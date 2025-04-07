@@ -17,6 +17,8 @@ import csv
 import datetime
 from multiprocessing import Pool, Value, Array, Manager, Lock
 
+# from Demos.win32cred_demo import target
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
@@ -98,10 +100,10 @@ ft20 = 1165
 # TARGET_MAKESPAN 문제에 맞게 수정바람
 ############################################################################################
 
-# Configuration for target makespan and migration frequency
-TARGET_MAKESPAN = 666  # 목표 Makespan
-MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
-random_seed = 2 # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
+# # Configuration for target makespan and migration frequency
+# TARGET_MAKESPAN = 666  # 목표 Makespan
+# MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
+# random_seed = 2 # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
 # random_seed = None  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
 
 
@@ -152,7 +154,7 @@ def run_ga_engine(args):
 
 
 
-def main():
+def main(filename, random_seed, target_makespan):
     """
     Main function to setup and execute the GA engines.
     """
@@ -171,12 +173,12 @@ def main():
     # 1) file, Run_Config 조정바람
     ############################################################################################
 
-    file = 'la01.txt'
-    print(f"Loading dataset from {file}...")  # 디버그 출력 추가
-    dataset = Dataset(file)
+    # file = 'la01.txt'
+    print(f"Loading dataset from {filename}...")  # 디버그 출력 추가
+    dataset = Dataset(filename)
 
     # Custom GA settings    
-    base_config = Run_Config(n_job=10, n_machine=5, n_op=50, population_size=100, generations=400, 
+    base_config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op, population_size=100, generations=400,
                              print_console=False, save_log=True, save_machinelog=True, 
                              show_gantt=False, save_gantt=True, show_gui=False,
                              trace_object='Process4', title='Gantt Chart for JSSP',
@@ -184,8 +186,8 @@ def main():
     
     print("Base config created...")  # 디버그 출력 추가
 
-    base_config.dataset_filename = file  # dataset 파일명 설정
-    base_config.target_makespan = TARGET_MAKESPAN  # 목표 Makespan
+    base_config.dataset_filename = filename  # dataset 파일명 설정
+    base_config.target_makespan = target_makespan  # 목표 Makespan
     base_config.island_mode = island_mode  # Add this line to set island_mode
 
     result_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'result')
@@ -386,4 +388,27 @@ def main():
                 print(f"Warning: {machine_log_path} does not exist.")
 
 if __name__ == "__main__":
-    main()
+    """
+    la01: 666  10, 5/  la11: 1222  20, 5
+la02: 655  10, 5/  la12: 1039  20, 5
+la03: 597  10, 5/  la13: 1150  20, 5
+la04: 590  10, 5/  la14: 1292  20, 5
+la05: 593  10, 5/  la15: 1207  20, 5
+la06: 926  15, 5/  la16: 945   10, 10
+la07: 890  15, 5/  la17: 784   10, 10
+la08: 863  15, 5/  la18: 848   10, 10
+la09: 951  15, 5/  la19: 842   10, 10
+la10: 958  15, 5/  la20: 902   10, 10
+"""
+    data_list = ['la16.txt',
+            'la18.txt',
+            'la19.txt',
+            'la20.txt'
+            ]
+    target_makespan_list = [945, 848, 842, 902]
+    for idx, data in enumerate(data_list):
+        for seed in range(5):
+            # TARGET_MAKESPAN = target_makespan_list[idx]  # 목표 Makespan
+            MIGRATION_FREQUENCY = 10100  # Migration frequency 설정
+            random_seed = seed  # Population 초기화시 일정하게 만들기 위함. None을 넣으면 아예 랜덤 생성(GA들끼리 같지않음)
+            main(data, seed, target_makespan_list[idx])
