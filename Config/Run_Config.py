@@ -26,6 +26,9 @@ Attributes:
 import os
 import datetime
 
+from Demos.win32cred_demo import target
+
+
 class Run_Config:
     def __init__(self, n_job, n_machine, n_op, population_size, generations,
                  print_console=False,
@@ -37,7 +40,8 @@ class Run_Config:
                  trace_object='Process4', title=None,
                  tabu_search_iterations=100, hill_climbing_iterations=100, simulated_annealing_iterations=100,
                  two_iterations = 100,
-                 ga_index=0):
+                 ga_index=0,
+                 target_makespan = None):
         """
         Initializes the Run_Config class with the specified parameters.
 
@@ -64,6 +68,7 @@ class Run_Config:
         self.n_job = n_job
         self.n_machine = n_machine
         self.n_op = n_op
+        self.target_makespan = target_makespan
 
         self.trace_object = trace_object
         self.trace_type = 'Single Part'
