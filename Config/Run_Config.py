@@ -37,7 +37,8 @@ class Run_Config:
                  trace_object='Process4', title=None,
                  tabu_search_iterations=100, hill_climbing_iterations=100, simulated_annealing_iterations=100,
                  two_iterations = 100,
-                 ga_index=0):
+                 ga_index=0,
+                 target_makespan = None):
         """
         Initializes the Run_Config class with the specified parameters.
 
@@ -74,7 +75,7 @@ class Run_Config:
         self.show_gantt = show_gantt
         self.save_gantt = save_gantt
         self.show_gui = show_gui
-        self.target_makespan = None
+        self.target_makespan = target_makespan
         self.num_parts = 1
         self.IAT = float("inf")
 
