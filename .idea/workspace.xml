@@ -5,21 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9baef7f3-fe67-4e5a-a0a4-579ecdcbea9f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Comparison/Comparison.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Comparison/baseline.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Comparison/baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/Comparison/baseline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAS/GA.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/GA.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GAS/Individual.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/Individual.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/as.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/ge.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/la01.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/population_generations_1_1.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/population_generations_1_2.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/population_generations_1_3.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/population_generations_1_4.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/population_generations_1_5.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAS/Population.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/Population.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAS/run_APMS.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/run_APMS.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result/250406.csv" beforeDir="false" afterPath="$PROJECT_DIR$/result/250406.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,7 +44,8 @@
     "Python.baseline.executor": "Debug",
     "Python.env.executor": "Debug",
     "Python.run.executor": "Run",
-    "git-widget-placeholder": "APMS__2.0",
+    "Python.run_APMS.executor": "Run",
+    "git-widget-placeholder": "APMS__2.1",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -81,7 +74,7 @@
       <workItem from="1745452947607" duration="602000" />
       <workItem from="1746054110246" duration="11465000" />
       <workItem from="1747630795365" duration="119000" />
-      <workItem from="1747630933088" duration="3155000" />
+      <workItem from="1747630933088" duration="5636000" />
     </task>
     <servers />
   </component>
@@ -104,13 +97,18 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/GAS/run.py</url>
-          <line>298</line>
+          <line>296</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Comparison/baseline.py</url>
           <line>129</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GAS/run_APMS.py</url>
+          <line>184</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -122,7 +120,7 @@
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$Comparison.coverage" NAME="Comparison Coverage Results" MODIFIED="1747635779314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Comparison" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$run_APMS_ini.coverage" NAME="run_APMS_ini Coverage Results" MODIFIED="1742259190078" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$Population.coverage" NAME="Population Coverage Results" MODIFIED="1736751784801" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
-    <SUITE FILE_PATH="coverage/2024_JSSP_GA$run_APMS.coverage" NAME="run_APMS Coverage Results" MODIFIED="1742196115810" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
+    <SUITE FILE_PATH="coverage/2024_JSSP_GA$run_APMS.coverage" NAME="run_APMS Coverage Results" MODIFIED="1747639231109" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$GA.coverage" NAME="GA Coverage Results" MODIFIED="1741308178956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$baseline.coverage" NAME="baseline Coverage Results" MODIFIED="1747636475702" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Comparison" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$DataGenerator.coverage" NAME="DataGenerator Coverage Results" MODIFIED="1743912856624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data" />

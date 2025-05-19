@@ -1,6 +1,5 @@
 from Data.Dataset.Dataset import Dataset
 import random
-from GAS.Population import JSSP
 
 class Job:
     def __init__(self, idx, op_data):
@@ -109,6 +108,7 @@ def baseline(_dataset, mode = 'min'):
 if __name__ == '__main__':
     from GAS.Individual import Individual
     from Config.Run_Config import Run_Config
+    from GAS.Population import JSSP
     instance = 'la03.txt'
     dataset = Dataset(instance)
     jssp = JSSP(dataset)

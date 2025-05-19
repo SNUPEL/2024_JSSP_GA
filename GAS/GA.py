@@ -103,7 +103,8 @@ class GAEngine:
     def __init__(self, config, op_data, crossover, mutation, selection, local_search=None, pso=None,
                  selective_mutation=None, elite_ratio=0.1, ga_engines=None, island_mode=1,
                  migration_frequency=10, initialization_mode='1', dataset_filename=None, initial_population=None,
-                 local_search_frequency=2, selective_mutation_frequency=10, random_seed=None, record=False):
+                 local_search_frequency=2, selective_mutation_frequency=10, random_seed=None, record=False,
+                 target_makespan = None):
         """
         Initializes the GA engine with the given parameters.
         
@@ -147,21 +148,16 @@ class GAEngine:
         self.selective_mutation_frequency = selective_mutation_frequency
         self.random_seed = random_seed
         self.local_search_top_percentage = 0.01  
-        if initialization_mode == '0':
-            self.population = Population(config, op_data, random_seed=random_seed)
-        if initialization_mode in ['20', '40', '60', '80', '100']:
-            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed, num=int(initialization_mode))
-        elif initialization_mode == '3':
-            self.population = Population.from_giffler_thompson(config, op_data, dataset_filename, random_seed=random_seed)
+        if initialization_mode == 'RANDOM':
+            self.population = Population(config, op_data, random_seed=random_seed, target_makespan=target_makespan)
+        elif initialization_mode =='RUBI':
+            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed, num=config.population_size)
+        elif initialization_mode == 'SPT':
+            self.population = Population.from_SPT(config, op_data, dataset_filename)
+        elif initialization_mode == 'LPT':
+            self.population = Population.from_LPT(config, op_data, dataset_filename)
         else:
-            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed, percentage = int(initialization_mode))
-
-    # if initialization_mode == '2':
-        #     self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
-        # elif initialization_mode == '3':
-        #     self.population = Population.from_giffler_thompson(config, op_data, dataset_filename, random_seed=random_seed)
-        # else:
-        #     self.population = Population(config, op_data, random_seed=random_seed)
+            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
 
     def update_new_populations(self, index, new_populations):
         # 현재 population에서 상위 10% 개체를 추출하여 new_populations에 저장

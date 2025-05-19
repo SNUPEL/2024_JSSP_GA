@@ -57,7 +57,7 @@ def swap_digits(num):
         return units * 10 + tens
 
 class Individual:
-    def __init__(self, config=None, seq=None, solution_seq=None, op_data=None):
+    def __init__(self, config=None, seq=None, solution_seq=None, op_data=None, target_makespan=None):
         self.fitness = None
         self.monitor = None  # Add monitor attribute
         if solution_seq is not None:
@@ -74,12 +74,12 @@ class Individual:
         self.machine_order = self.get_machine_order()
         self.makespan, self.mio_score = self.evaluate(self.machine_order)
         self.score = calculate_score(self.MIO, self.MIO_sorted)
-        self.calculate_fitness()  # Ensure target_makespan is passed
+        self.calculate_fitness(target_makespan)  # Ensure target_makespan is passed
 
     def __str__(self):
         return f"Individual(makespan={self.makespan}, fitness={self.fitness})"
 
-    def calculate_fitness(self, best=None, worst=None):
+    def calculate_fitness(self, target_makespan):
         if self.makespan == 0:
             raise ValueError("Makespan is zero, which will cause division by zero error.")
         if target_makespan is not None:
