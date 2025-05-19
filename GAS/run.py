@@ -248,9 +248,7 @@ def main(kwargs):
     ############################################################################################
 
     custom_settings = [
-        # {'crossover': CXCrossover, 'pc': 1, 'mutation': CompositeMutation, 'pm': 1, 'selection': TournamentSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
         {'crossover': PMXCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 1.0, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': None},
-        # {'crossover': OrderCrossover, 'pc': 0.7, 'mutation': CompositeMutation, 'pm': 0.5, 'selection': SeedSelection(), 'local_search': [], 'pso':  None, 'selective_mutation': SelectiveMutation(pm_high=0.7, pm_low=0.4, rank_divide=0.05)},
     ]
 
     ga_engines = []

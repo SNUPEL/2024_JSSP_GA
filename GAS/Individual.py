@@ -82,7 +82,10 @@ class Individual:
     def calculate_fitness(self, target_makespan):
         if self.makespan == 0:
             raise ValueError("Makespan is zero, which will cause division by zero error.")
-        self.fitness = 1 / (self.makespan / target_makespan)
+        if target_makespan is not None:
+            self.fitness = 1 / (self.makespan / target_makespan)
+        else:
+            self.fitness = None
         return self.fitness
 
     def interpret_solution(self, s):
