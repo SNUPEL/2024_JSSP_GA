@@ -21,7 +21,7 @@ import numpy as np
 import random
 from GAS.Individual import Individual
 from Data.Dataset.Dataset import Dataset
-
+from Comparison.baseline import baseline
 print_console = False
 
 ############################################################################################
@@ -369,6 +369,27 @@ class Population:
     ##############################################  
     #            휴리스틱 위한거                  #
     ##############################################
+
+    @classmethod
+    def from_SPT(cls, config, op_data, dataset_filename):
+
+        dataset = Dataset(dataset_filename)
+        SPT = [baseline(dataset, "min") for i in range(config.population_size)]
+        SPT_individuals = [Individual(config, seq=spt_seq[1], op_data=dataset.op_data) for spt_seq in SPT]
+        population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
+        population.individuals = SPT_individuals
+        print(config.population_size, "개의 SPT individuals 가 생성되었습니다!")
+        return population
+
+    @classmethod
+    def from_LPT(cls, config, op_data, dataset_filename):
+        dataset = Dataset(dataset_filename)
+        LPT = [baseline(dataset, "max") for i in range(config.population_size)]
+        LPT_individuals = [Individual(config, seq=lpt_seq[1], op_data=dataset.op_data) for lpt_seq in LPT]
+        population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
+        population.individuals = LPT_individuals
+        print(config.population_size, "개의 LPT individuals 가 생성되었습니다!")
+        return population
 
     @classmethod
     def from_giffler_thompson(cls, config, op_data, dataset_filename, random_seed=None):

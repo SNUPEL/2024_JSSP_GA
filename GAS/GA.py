@@ -150,12 +150,17 @@ class GAEngine:
 
         self.local_search_top_percentage = 0.01
 
-        if initialization_mode == '0':
+        if initialization_mode == 'RANDOM':
             self.population = Population(config, op_data, random_seed=random_seed)
+        elif initialization_mode == 'RUBI':
+            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
+        elif initialization_mode == 'SPT':
+            self.population = Population.from_SPT(config, op_data, dataset_filename)
+        elif initialization_mode == 'LPT':
+            self.population = Population.from_LPT(config, op_data, dataset_filename)
         else:
-            self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed, percentage = int(initialization_mode))
-
-    # if initialization_mode == '2':
+            raise Exception('Invalid initialization mode')
+        # if initialization_mode == '2':
         #     self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
         # elif initialization_mode == '3':
         #     self.population = Population.from_giffler_thompson(config, op_data, dataset_filename, random_seed=random_seed)
