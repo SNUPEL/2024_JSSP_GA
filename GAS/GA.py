@@ -158,6 +158,8 @@ class GAEngine:
             self.population = Population.from_SPT(config, op_data, dataset_filename)
         elif initialization_mode == 'LPT':
             self.population = Population.from_LPT(config, op_data, dataset_filename)
+        elif initialization_mode == 'GT':
+            self.population = Population.from_GT(config, op_data, dataset_filename)
         else:
             raise Exception('Invalid initialization mode')
         # if initialization_mode == '2':

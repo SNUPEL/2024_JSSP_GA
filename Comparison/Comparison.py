@@ -1,9 +1,11 @@
-from GAS.Individual import Individual
-from Config.Run_Config import Run_Config
-from baseline import baseline
-from Data.Dataset.Dataset import Dataset
-from GAS.Population import JSSP
+# from GAS.Population import JSSP
 import random
+
+from Config.Run_Config import Run_Config
+from Data.Dataset.Dataset import Dataset
+from GAS.Individual import Individual
+from baseline import baseline
+
 
 def comparison_report(ins, opt):
     instance = ins

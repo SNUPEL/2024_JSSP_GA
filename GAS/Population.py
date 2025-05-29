@@ -21,7 +21,9 @@ import numpy as np
 import random
 from GAS.Individual import Individual
 from Data.Dataset.Dataset import Dataset
-from Comparison.baseline import baseline
+# from baseline import baseline
+from Comparison.baseline import baseline, GifflerandThompson
+
 print_console = False
 
 ############################################################################################
@@ -379,6 +381,16 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = SPT_individuals
         print(config.population_size, "개의 SPT individuals 가 생성되었습니다!")
+        return population
+
+    @classmethod
+    def from_GT(cls, config, op_data, dataset_filename):
+        dataset = Dataset(dataset_filename)
+        GT = [GifflerandThompson(dataset) for i in range(config.population_size)]
+        GT_individuals = [Individual(config, seq=gt_seq, op_data=dataset.op_data) for gt_seq in GT]
+        population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
+        population.individuals = GT_individuals
+        print(config.population_size, "개의 GT individuals 가 생성되었습니다!")
         return population
 
     @classmethod

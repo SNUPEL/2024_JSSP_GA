@@ -51,6 +51,65 @@ class Machine:
                 event_time_list.append((self.idx, self.earliest_finish))
                 return job
 
+def GifflerandThompson(_dataset):
+    _dataset: Dataset
+    schedule = []
+    machine_list = [Machine(i) for i in range(_dataset.n_machine)]
+    job_list = [Job(i, _dataset.op_data[i]) for i in range(_dataset.n_job)]
+    now = 0
+    event_time_list = []  # (machine_idx, machine.earliest_finish)
+
+    current_index = [0 for i in range(_dataset.n_job)]
+    machine_ETT = [0 for i in range(_dataset.n_machine)] # Earliest Termination Time
+    done = False
+    now = 0
+    operation_ESD = [0 for i in range(_dataset.n_job)]
+    job_seq = []
+    while not done:
+        pt_list = [0 for i in range(_dataset.n_job)]
+        machine_list = [0 for i in range(_dataset.n_job)]
+        for i in range(_dataset.n_job):
+            if current_index[i] != _dataset.n_machine:
+                pt_list[i] = _dataset.op_data[i][current_index[i]][1]
+            else:
+                pt_list[i] = float('inf')
+
+        for i in range(_dataset.n_job):
+            if current_index[i] != _dataset.n_machine:
+                machine_list[i] = _dataset.op_data[i][current_index[i]][0]
+            else:
+                machine_list[i] = 0
+        # print(f'현재 남아있는 operation들의 작업시간 : ', pt_list)
+        # print(f'현재 남아있는 operation에 해당하는 machine : ', machine_list)
+        operation_ETT = [0 for i in range(_dataset.n_job)]
+        # print('현재 각 operation들이 작업을 시작할 수 있는 시간 :', operation_ESD)
+        for i in range(_dataset.n_job):
+            operation_ETT[i] = max(operation_ESD[i], machine_ETT[machine_list[i]]) + pt_list[i]
+            # print(f'Job{i}의 가장 빠른 operation 완료시간은 operation_ESD {operation_ESD[i]} 와 machine_ETT {machine_ETT[machine_list[i]]} 중에 더 큰 값에 pt를 더한 {operation_ETT[i]}입니다.')
+            # if operation_ESD[i] >= machine_ETT[machine_list[i]]: # 23 > 10
+            #     operation_ETT[i] = operation_ESD[i] + pt_list[i] # 23 + 5
+            # else: # 23 , 30
+            #     operation_ETT[i] = machine_ETT[machine_list[i]] + pt_list[i] # 30 + 5
+
+        # print('현재 각 operation들이 끝날 수 있는 시간 :', operation_ETT)
+        selected_job = operation_ETT.index(min(operation_ETT))
+        selected_machine = machine_list[selected_job]
+        machine_ETT[selected_machine] = min(operation_ETT)
+        job_seq.append(selected_job * _dataset.n_machine + current_index[selected_job])
+
+        current_index[selected_job] += 1
+        # print(f'Job{selected_job}를 machine{selected_machine}에서 작업합니다.'
+        #       f'\n\t작업시간은 {pt_list[selected_job]}, 끝나는 시점은 {machine_ETT[selected_machine]}이 될 예정입니다.')
+        # print('machine_ETT:',machine_ETT)
+        operation_ESD[selected_job] = operation_ETT[selected_job]
+        if sum(current_index) == _dataset.n_job * _dataset.n_machine:
+            done = True
+    # print(max(machine_ETT))
+    return job_seq
+
+
+
+
 def baseline(_dataset, mode = 'min'):
     _dataset : Dataset
     schedule = []
@@ -104,27 +163,3 @@ def baseline(_dataset, mode = 'min'):
     # print(f"{[j.current_idx for j in job_list]} / {now}")
     return now, schedule
 
-
-if __name__ == '__main__':
-    from GAS.Individual import Individual
-    from Config.Run_Config import Run_Config
-    from GAS.Population import JSSP
-    instance = 'la03.txt'
-    dataset = Dataset(instance)
-    jssp = JSSP(dataset)
-    config = Run_Config(n_job=dataset.n_job, n_machine=dataset.n_machine, n_op=dataset.n_op, population_size=100,
-                        generations=1,
-                        print_console=False, save_log=True, save_machinelog=True,
-                        show_gantt=False, save_gantt=True, show_gui=False,
-                        trace_object='Process4', title='Gantt Chart for JSSP',
-                        tabu_search_iterations=10, hill_climbing_iterations=30, simulated_annealing_iterations=50,
-                        two_iterations=1000, target_makespan=None)
-
-    RUBI_individuals = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for i in range(10)]
-    RUBI_makespan = [s.makespan for s in RUBI_individuals]
-    SPT = [baseline(dataset, "min") for i in range(10)]
-    SPT_individuals = [Individual(config, seq=spt_seq[1], op_data=dataset.op_data) for spt_seq in SPT]
-    SPT_makespan1 = [spt_seq[0] for spt_seq in SPT]
-    SPT_makespan2 = [s.makespan for s in SPT_individuals]
-
-    print()

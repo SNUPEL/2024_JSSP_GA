@@ -396,10 +396,10 @@ if __name__ == "__main__":
     for i, ins in enumerate(directories):
         for seed in range(5):
             # for ini in ['0']:
-            for ini in ['SPT', 'LPT']:
+            for ini in ['GT']:
             # for ini in ['RANDOM', 'RUBI', 'SPT', 'LPT']:
                 kwargs = {'_file': ins,
-                          '_resultfile': '../result/250519.csv',
+                          '_resultfile': '../result/250528.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
