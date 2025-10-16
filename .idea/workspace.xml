@@ -5,13 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9baef7f3-fe67-4e5a-a0a4-579ecdcbea9f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/GAS/result_RANDOM_RUBI_SPT_LPT_GT.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Comparison/baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/Comparison/baseline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/GA.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/GA.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/Individual.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/Individual.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/Population.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/Population.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAS/run_APMS.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/run_APMS.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result/250406.csv" beforeDir="false" afterPath="$PROJECT_DIR$/result/250406.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAS/experiment.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/experiment.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAS/experimental_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAS/experimental_result.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,16 +40,24 @@
     "Python.Tabu.executor": "Run",
     "Python.baseline.executor": "Debug",
     "Python.env.executor": "Debug",
+    "Python.experimental_result.executor": "Run",
     "Python.run.executor": "Run",
     "Python.run_APMS.executor": "Run",
-    "git-widget-placeholder": "APMS__2.1",
+    "git-widget-placeholder": "APMS__2.2",
+    "last_opened_file_path": "C:/SNU EnSite/2024_JSSP_GA/GAS",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\SNU EnSite\2024_JSSP_GA\GAS" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -110,6 +115,21 @@
           <line>184</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GAS/experimental_result.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="33" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GAS/experimental_result.py</url>
+          <line>27</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GAS/experimental_result.py</url>
+          <line>34</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
@@ -120,13 +140,14 @@
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$Comparison.coverage" NAME="Comparison Coverage Results" MODIFIED="1747635779314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Comparison" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$run_APMS_ini.coverage" NAME="run_APMS_ini Coverage Results" MODIFIED="1742259190078" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$Population.coverage" NAME="Population Coverage Results" MODIFIED="1736751784801" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
-    <SUITE FILE_PATH="coverage/2024_JSSP_GA$run_APMS.coverage" NAME="run_APMS Coverage Results" MODIFIED="1747639231109" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
+    <SUITE FILE_PATH="coverage/2024_JSSP_GA$experimental_result.coverage" NAME="experimental_result Coverage Results" MODIFIED="1748493772547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
+    <SUITE FILE_PATH="coverage/2024_JSSP_GA$run_APMS.coverage" NAME="run_APMS Coverage Results" MODIFIED="1748423195091" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$GA.coverage" NAME="GA Coverage Results" MODIFIED="1741308178956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
-    <SUITE FILE_PATH="coverage/2024_JSSP_GA$baseline.coverage" NAME="baseline Coverage Results" MODIFIED="1747636475702" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Comparison" />
+    <SUITE FILE_PATH="coverage/2024_JSSP_GA$baseline.coverage" NAME="baseline Coverage Results" MODIFIED="1748422135751" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Comparison" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$DataGenerator.coverage" NAME="DataGenerator Coverage Results" MODIFIED="1743912856624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$MIO.coverage" NAME="MIO Coverage Results" MODIFIED="1725588066246" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS/Initialization" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$APMS.coverage" NAME="APMS Coverage Results" MODIFIED="1742698704050" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/postprocessing" />
-    <SUITE FILE_PATH="coverage/2024_JSSP_GA$run.coverage" NAME="run Coverage Results" MODIFIED="1743998039549" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GAS" />
+    <SUITE FILE_PATH="coverage/2024_JSSP_GA$run.coverage" NAME="run Coverage Results" MODIFIED="1748422150282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Comparison" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$Dataset.coverage" NAME="Dataset Coverage Results" MODIFIED="1741084760257" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data/Dataset" />
     <SUITE FILE_PATH="coverage/2024_JSSP_GA$evaluate.coverage" NAME="evaluate Coverage Results" MODIFIED="1741078922309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data/Dataset" />
   </component>

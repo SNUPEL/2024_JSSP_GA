@@ -12,7 +12,7 @@ optimal = {'la01': 666, 'la11': 1222,
            'la10': 958, 'la20': 902,
            }
 # CSV 파일 불러오기
-df = pd.read_csv("result_250114.csv")  # 실제 파일 경로로 바꿔줘야 함
+df = pd.read_csv("result_RANDOM_RUBI_SPT_LPT_GT.csv")  # 실제 파일 경로로 바꿔줘야 함
 
 # Initialization 값들
 init_values = ['SGA_BM','SGA_BRT','RUBI_BM', 'RUBI_BRT']
@@ -23,7 +23,7 @@ result_matrix = pd.DataFrame(index=problem_values, columns=init_values)
 
 # 각 Problem-Initialization 조합에 대해 seed 개수 확인
 for problem in problem_values:
-    for init in [0, 100]:
+    for init in ['0', '100', 'SPT', 'LPT', 'GT']:
         subset = df[(df['Problem'] == problem) & (df['Initialization'] == init)]
         problem = subset['Problem'].unique()[0]
         optimal_set = subset[subset['Best Makespan'] == optimal[problem]]
@@ -32,15 +32,24 @@ for problem in problem_values:
         else:
             avg_optimal = None
         # seed_count = subset['Seed'].nunique()
-        if init == 0:
-            result_matrix.loc[problem, "SGA_BM"] = subset['Best Makespan'].min()
-            result_matrix.loc[problem, "SGA_BRT"] = avg_optimal
-        elif init == 100:
-            result_matrix.loc[problem, "RUBI_BM"] = subset['Best Makespan'].min()
+        if init == '0':
+            result_matrix.loc[problem, "RANDOM_BM"] = int(subset['Best Makespan'].min())
+            result_matrix.loc[problem, "RANDOM_BRT"] = avg_optimal
+        elif init == '100':
+            result_matrix.loc[problem, "RUBI_BM"] = int(subset['Best Makespan'].min())
             result_matrix.loc[problem, "RUBI_BRT"] = avg_optimal
-
+        elif init == 'SPT':
+            result_matrix.loc[problem, "SPT_BM"] = int(subset['Best Makespan'].min())
+            result_matrix.loc[problem, "SPT_BRT"] = avg_optimal
+        elif init == 'LPT':
+            result_matrix.loc[problem, "LPT_BM"] = int(subset['Best Makespan'].min())
+            result_matrix.loc[problem, "LPT_BRT"] = avg_optimal
+        elif init == 'GT':
+            result_matrix.loc[problem, "GT_BM"] = int(subset['Best Makespan'].min())
+            result_matrix.loc[problem, "GT_BRT"] = avg_optimal
 # 불리언 타입으로 변환 (선택 사항)
 # result_matrix = result_matrix.astype(bool)
 
 # 결과 출력
 print(result_matrix)
+result_matrix.to_csv("result_REVISION.csv")
