@@ -79,7 +79,7 @@ class Run_Config:
         self.num_parts = 1
         self.IAT = float("inf")
 
-        self.simul_time = 10000
+        self.simul_time = 1e10
         self.dispatch_mode = 'Manual'
         self.gantt_title = title
 

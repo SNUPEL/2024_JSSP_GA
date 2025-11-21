@@ -154,6 +154,8 @@ class GAEngine:
             self.population = Population(config, op_data, random_seed=random_seed)
         elif initialization_mode == 'RUBI':
             self.population = Population.from_mio(config, op_data, dataset_filename, random_seed=random_seed)
+        elif initialization_mode == 'MoRUBI':
+            self.population = Population.from_modified_rubi(config, op_data, dataset_filename, random_seed=random_seed)
         elif initialization_mode == 'SPT':
             self.population = Population.from_SPT(config, op_data, dataset_filename)
         elif initialization_mode == 'LPT':
@@ -253,10 +255,11 @@ class GAEngine:
                 best_individual = min(self.population.individuals, key=lambda ind: ind.makespan)
                 best_fitness = best_individual.makespan
                 # print(f"GA{index+1}_Best fitness at generation select crossover mutate 후 {sync_generation[index]}: {best_fitness}")
-                # print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
-                print(best_fitness,end=' ')
-                if sync_generation[index]%20 == 19:
-                    print('')
+                # print([ind.makespan for ind in self.population.individuals])
+                print(f"GA{index+1}_Best fitness at generation {sync_generation[index]}: {best_fitness} (optimal:{self.config.target_makespan})")
+                # print(best_fitness,end=' ')
+                # if sync_generation[index]%20 == 19:
+                #     print('')
                 # 상위 10% 개체를 new_populations에 저장
                 self.update_new_populations(index, new_populations)
                 # print(new_populations)
@@ -405,12 +408,13 @@ class GAEngine:
                 
                 # if best_individual is not None:
                 # if best_individual is not None and convergence >= 0.8*len(self.population.individuals):
-                if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
-                    elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
-                    print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
-                    print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
+                if self.config.target_makespan is not None:
+                    if best_individual is not None and best_individual.makespan <= self.config.target_makespan:
+                        elapsed_time = time.time() - start_time  # 걸린 소요시간 계산
+                        print(f"GA{index+1}_Stopping early as best makespan {best_individual.makespan} is below target {self.config.target_makespan}.")
+                        print(f"GA{index+1}_Elapsed time: {elapsed_time:.2f} seconds.")  # 소요시간 출력
 
-                    break
+                        break
 
                 with sync_lock:
                     sync_generation[index] += 1

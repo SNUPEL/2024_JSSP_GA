@@ -44,15 +44,18 @@ class Operation:
         op_prior (Operation): Prior operation in the job sequence.
         op_following (Operation): Following operation in the job sequence.
     """
-    def __init__(self, i, j, machine, n_machine):
+    def __init__(self, i, j, machine, n_machine, process_time=None):
         self.job = i
         self.precedence = j
         self.machine = machine
+        self.process_time = process_time
         self.idx = n_machine * i + j
         self.job_ready = j == 0
         self.machine_ready = j == 0
         self.op_prior = None
         self.op_following = None
+        self.EST = 0
+        self.ETT = 0
 
 class MIOMachine:
     """
@@ -115,7 +118,7 @@ class JSSP:
         # Initialization
         for i in range(self.dataset.n_job):
             for j in range(self.dataset.n_machine):
-                self.op_list[i].append(Operation(i, j, self.machine_list[self.op_data[i][j][0]], dataset.n_machine))
+                self.op_list[i].append(Operation(i, j, self.machine_list[self.op_data[i][j][0]], dataset.n_machine, self.op_data[i][j][1]))
 
         for i in range(self.dataset.n_job):
             for j in range(self.dataset.n_machine):
@@ -129,6 +132,62 @@ class JSSP:
             for j in range(1, self.dataset.n_machine):
                 self.op_list[i][j].op_prior = self.op_list[i][j - 1]
                 self.op_list[i][j - 1].op_following = self.op_list[i][j]
+
+    def get_modified_rubi_seq(self):
+        self.ready = []
+        self.seq = []
+        for i in range(self.dataset.n_job):
+            for j in range(self.dataset.n_machine):
+                if self.op_list[i][j].job_ready and self.op_list[i][j].machine_ready:
+                    self.ready.append(self.op_list[i][j])
+
+        while len(self.seq) < self.dataset.n_op:
+            if print_console: print('1. 현재 대기중인 작업 : ', [op.idx for op in self.ready])
+            # random.shuffle(self.ready)
+            # op = self.ready.pop()
+            prob = [1 / op.process_time for op in self.ready]
+            op = random.choices(self.ready, weights=prob, k=1)[0]
+            self.ready.remove(op)
+            if print_console: print('2. 결정된 작업 : ', (op.job, op.precedence))
+            self.seq.append(op)
+
+            if op.precedence != self.dataset.n_machine - 1:
+                if print_console: print('3. 현재까지 형성된 sequence : ', [op.idx for op in self.seq])
+                if print_console: print('3-1. sequence 길이 :', len(self.seq))
+
+                op.op_following.job_ready = True
+                if print_console: print('4. 같은 job의 다음 operation의 작업 가능 현황 : ',
+                                        (op.op_following.job_ready, op.op_following.machine_ready))
+
+                if print_console: print('5-1. machine의 ready list 수정 전 : ', [op.idx for op in op.machine.op_ready])
+
+                # Check if op is in op_ready before removing
+                if op in op.machine.op_ready:
+                    op.machine.op_ready.remove(op)
+                    if print_console: print('5-2. machine의 ready list 수정 후 : ', [op.idx for op in op.machine.op_ready])
+                else:
+                    print(f"Error: Operation {op.idx} not found in machine {op.machine.id} op_ready list")
+                    print(f"Current op_ready list: {[op.idx for op in op.machine.op_ready]}")
+                    break  # Stop the process to prevent further errors
+
+                op.machine.update_op_ready()
+
+                # Check if the following operation is ready
+                if op.op_following.job_ready and op.op_following.machine_ready:
+                    if op.op_following not in self.ready:
+                        self.ready.append(op.op_following)
+                        if print_console: print('6. Job 진행으로 인해 새롭게 ready list에 추가되는 작업 : ',
+                                                (op.op_following.job, op.op_following.precedence))
+
+                for x in op.machine.op_ready:
+                    if x.job_ready and x.machine_ready:
+                        if x not in self.ready:
+                            self.ready.append(x)
+                            if print_console: print('7. Machine 진행으로 인해 새롭게 ready list에 추가되는 작업 : ',
+                                                    (x.idx))
+        s = [op.idx for op in self.seq]
+        self.__init__(self.dataset)
+        return s
 
     def get_seq(self):
         """
@@ -209,11 +268,11 @@ class GifflerThompson:
     def optimize(self, individual, config):
         """
         Optimizes the given individual using Giffler-Thompson heuristic.
-        
+
         Parameters:
             individual (Individual): The individual to optimize.
             config: Configuration object for the job shop.
-        
+
         Returns:
             Individual: The optimized individual.
         """
@@ -249,13 +308,13 @@ class GifflerThompson:
     def giffler_thompson(self, seq, op_data, config, priority_rule):
         """
         Applies Giffler-Thompson heuristic with the given priority rule.
-        
+
         Parameters:
             seq (list): Sequence of operations.
             op_data (list): Operation data.
             config: Configuration object for the job shop.
             priority_rule (str): Priority rule to apply.
-        
+
         Returns:
             list: Optimized sequence of operations.
         """
@@ -264,13 +323,13 @@ class GifflerThompson:
     def apply_priority_rule(self, seq, op_data, config, priority_rule):
         """
         Applies the specified priority rule to the sequence of operations.
-        
+
         Parameters:
             seq (list): Sequence of operations.
             op_data (list): Operation data.
             config: Configuration object for the job shop.
             priority_rule (str): Priority rule to apply.
-        
+
         Returns:
             list: Sorted sequence of operations.
         """
@@ -301,12 +360,12 @@ class GifflerThompson:
     def create_new_individual(self, individual, new_seq, config):
         """
         Creates a new individual with the given sequence.
-        
+
         Parameters:
             individual (Individual): The original individual.
             new_seq (list): The new sequence of operations.
             config: Configuration object for the job shop.
-        
+
         Returns:
             Individual: The new individual.
         """
@@ -339,6 +398,42 @@ class Population:
     #               MIO를 위한거                  #
     ##############################################
     @classmethod
+    def from_rubi_spt(cls, config, op_data, dataset_filename, random_seed=None, percentage = 100):
+        dataset = Dataset(dataset_filename)
+        jssp = JSSP(dataset)
+
+        if random_seed is not None:
+            random.seed(random_seed)
+            np.random.seed(random_seed)
+
+        SPT = [baseline(dataset, "min") for i in range(50)]
+        individuals_1 = [Individual(config, seq=spt_seq[1], op_data=dataset.op_data) for spt_seq in SPT]
+        individuals_2 = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(50)]
+        population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
+        population.individuals = individuals_1 + individuals_2
+
+        print(f"{50} SPT individuals and {50} RUBI individuals generated!")
+        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        return population
+
+    @classmethod
+    def from_modified_rubi(cls, config, op_data, dataset_filename, random_seed=None, percentage = 100):
+        dataset = Dataset(dataset_filename)
+        jssp = JSSP(dataset)
+
+        if random_seed is not None:
+            random.seed(random_seed)
+            np.random.seed(random_seed)
+
+        individuals_2 = [Individual(config, seq=jssp.get_modified_rubi_seq(), op_data=dataset.op_data) for _ in range(100)]
+        population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
+        population.individuals = individuals_2
+
+        print(f"{100} Modified RUBI individuals generated!")
+        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        return population
+
+    @classmethod
     def from_mio(cls, config, op_data, dataset_filename, random_seed=None, percentage = 100):
         """
         Initializes a population using the MIO method.
@@ -364,8 +459,9 @@ class Population:
         individuals_1 = [Individual(config, seq=jssp.get_seq(), op_data=dataset.op_data) for _ in range(num_MIO)]
         individuals_2 = [Individual(config, seq=random.sample(range(config.n_op), config.n_op), op_data=dataset.op_data) for _ in range(num_RANDOM)]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
-        print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
         population.individuals = individuals_1 + individuals_2
+        print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
+        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     ##############################################  
@@ -381,6 +477,7 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = SPT_individuals
         print(config.population_size, "개의 SPT individuals 가 생성되었습니다!")
+        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
@@ -391,6 +488,7 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = GT_individuals
         print(config.population_size, "개의 GT individuals 가 생성되었습니다!")
+        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
@@ -401,19 +499,20 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = LPT_individuals
         print(config.population_size, "개의 LPT individuals 가 생성되었습니다!")
+        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
     def from_giffler_thompson(cls, config, op_data, dataset_filename, random_seed=None):
         """
         Initializes a population using the Giffler-Thompson method.
-        
+
         Parameters:
             config: Configuration object for the job shop.
             op_data (list): Operation data.
             dataset_filename (str): Path to the dataset file.
             random_seed (int): Seed for random number generation.
-        
+
         Returns:
             Population: The initialized population.
         """

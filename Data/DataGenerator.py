@@ -11,10 +11,13 @@ from Metrics import *
 import random
 
 
-def generate_JSSP_data(num_job, num_machine, prefix):
-    filename = prefix + str(num_job) + str(num_machine) + '.txt'
+def generate_JSSP_data(num_job, num_machine, prefix, seed=0):
+    filename = prefix + '_' + str(num_job) + '_' + str(num_machine) + '_'+str(seed)+'.txt'
+    random.seed(seed)
+
+    np.random.seed(seed)
     first_line = f"{num_job}\t{num_machine}"
-    df = pd.DataFrame(np.random.randint(11, 41, size=(num_job, num_machine)))
+    df = pd.DataFrame(np.random.randint(90, 101, size=(num_job, num_machine)))
     # 각 행의 숫자를 1부터 num_machine까지의 permutation으로 변경
     for i in range(num_job):
         permutation = np.random.permutation(np.arange(1, num_machine + 1)).astype(int)
@@ -146,13 +149,14 @@ def generate_flowshoplike_data(n_job, n_machine, probability, prefix, instance):
 
 
 if __name__ == "__main__":
-    num_job = 30
-    num_machine = 15
-    # generate_JSSP_data(num_job, num_machine, './Dataset/test_')
-    for i in range(20):
-        generate_flowshoplike_data(num_job, num_machine, 0.05*i,'./Dataset/FS_', i+1)
-        generate_bottleneckshop_data(num_job, num_machine, 0.05*i,'./Dataset/BS_', i+1)
-    print()
+    num_job = 20
+    num_machine = 20
+    for i in range(10):
+        generate_JSSP_data(num_job, num_machine, './Dataset/LowVar',seed=i)
+    # for i in range(20):
+    #     generate_flowshoplike_data(num_job, num_machine, 0.05*i,'./Dataset/FS_', i+1)
+    #     generate_bottleneckshop_data(num_job, num_machine, 0.05*i,'./Dataset/BS_', i+1)
+    # print()
 
 # Assuming show_machine_distribution and show_pt_distribution are defined elsewhere
 # show_machine_distribution(dataset)

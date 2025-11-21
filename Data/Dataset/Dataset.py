@@ -38,12 +38,12 @@ class Dataset:
             filename (str): The name of the dataset file.
         """
         self.name, _ = os.path.splitext(filename)
-        self.path = 'Data\\Dataset\\'
-        if __name__ == "__main__":
-            file_path = os.path.join(os.getcwd(), filename)
-        else:
-            file_path = os.path.join(os.path.dirname(__file__), filename)
-
+        # self.path = '..\\Data\\Dataset\\LargeInstance\\'
+        # if __name__ == "__main__":
+        #     file_path = os.path.join(os.getcwd(), filename)
+        # else:
+        #     file_path = self.path + filename
+        file_path = filename
         # Read the first line of the file to get the number of jobs and machines
         with open(file_path, 'r') as file:
             first_line = file.readline()
