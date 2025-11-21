@@ -246,7 +246,7 @@ def main(_kwargs):
                              selective_mutation_frequency=selective_mutation_frequency,
                              random_seed=_seed,
                              record=_record)
-
+        initial_best = copy.deepcopy(min([ind.makespan for ind in ga_engine.population.individuals]))
         ga_engines.append(ga_engine)
 
         # print(f"Initialized GAEngine {i+1}")  # 디버그 출력 추가
@@ -328,29 +328,30 @@ def main(_kwargs):
                 initialization_time = GA_initialization_time - GA_start
                 total_time = GA_finish - GA_start
                 csvwriter.writerow([_instance.split('.')[0], dataset.n_job, dataset.n_machine, _instance.split('.')[0].split('_')[-1],
-                                    dataset.I_b, dataset.I_f, _initialization, _seed, best.makespan, best_time, initialization_time, total_time])
+                                    dataset.I_b, dataset.I_f, _initialization, _seed, initial_best, best.makespan, best_time, initialization_time, total_time])
 
 
 
 if __name__ == "__main__":
-    with open('../result/251120.csv', 'w', newline='') as csvfile:
+    with open('../result/251121_Lowvar.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['Filename', 'n_job', 'n_machine', 'Instance', 'I_b', 'I_f', 'RUBI Ratio', 'Seed', 'Best Makespan', 'Best Reached Time', 'Initialization Time', 'Execution Time'])
+        csvwriter.writerow(['Filename', 'n_job', 'n_machine', 'Instance', 'I_b', 'I_f', 'RUBI Ratio', 'Seed',
+                            'Initial Best', 'Best Makespan', 'Best Reached Time', 'Initialization Time', 'Execution Time'])
 
-    root_dir = '../Data/Dataset/251120'
+    root_dir = '../Data/Dataset/251121'
 
     problems = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
         for file in filenames:
             problems.append(os.path.join(dirpath, file))
     for i, ins in enumerate(problems):
-        for seed in range(10):
+        for seed in range(5):
             # for ini in ['0']:
             # for ini in ['MoRUBI']:
             # for ini in ['RUBI', 'RUBI-SPT', 'SPT']:
             for ini in ['RANDOM', 'RUBI', 'MoRUBI', 'SPT', 'LPT', 'GT']:
                 kwargs = {'_file': ins,
-                          '_resultfile': '../result/251120.csv',
+                          '_resultfile': '../result/251121_Lowvar.csv',
                           '_instance': ins.split('.')[-2].split('\\')[-1],
                           '_initialization': ini,
                           '_seed': seed,

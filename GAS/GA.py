@@ -186,8 +186,8 @@ class GAEngine:
             best_individual = None
             best_fitness = float('inf')
             
-            base_filename = dirname+f"\\population_generations_{index+1}"
-            filename = get_next_filename(base_filename)  # 다음 사용 가능한 파일 이름을 가져옵니다.
+            # base_filename = dirname+f"\\population_generations_{index+1}"
+            # filename = get_next_filename(base_filename)  # 다음 사용 가능한 파일 이름을 가져옵니다.
 
             while sync_generation[index] < self.config.generations:
                 # print(f"GA{index+1}_Evaluating generation {sync_generation[index]}")
@@ -403,8 +403,8 @@ class GAEngine:
                 all_generations.append((sync_generation[index], generation_data))
 
                 # 각 세대의 인구를 CSV 파일에 저장
-                if self.record:
-                    save_population_to_csv(self.population, filename, sync_generation[index])
+                # if self.record:
+                #     save_population_to_csv(self.population, filename, sync_generation[index])
                 
                 # if best_individual is not None:
                 # if best_individual is not None and convergence >= 0.8*len(self.population.individuals):
