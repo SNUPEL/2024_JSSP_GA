@@ -333,12 +333,12 @@ def main(_kwargs):
 
 
 if __name__ == "__main__":
-    with open('../result/251121_Lowvar.csv', 'w', newline='') as csvfile:
+    with open('../result/251120_Highvar.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['Filename', 'n_job', 'n_machine', 'Instance', 'I_b', 'I_f', 'RUBI Ratio', 'Seed',
                             'Initial Best', 'Best Makespan', 'Best Reached Time', 'Initialization Time', 'Execution Time'])
 
-    root_dir = '../Data/Dataset/251121'
+    root_dir = '../Data/Dataset/251120'
 
     problems = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
@@ -351,7 +351,7 @@ if __name__ == "__main__":
             # for ini in ['RUBI', 'RUBI-SPT', 'SPT']:
             for ini in ['RANDOM', 'RUBI', 'MoRUBI', 'SPT', 'LPT', 'GT']:
                 kwargs = {'_file': ins,
-                          '_resultfile': '../result/251121_Lowvar.csv',
+                          '_resultfile': '../result/251120_Highvar.csv',
                           '_instance': ins.split('.')[-2].split('\\')[-1],
                           '_initialization': ini,
                           '_seed': seed,
