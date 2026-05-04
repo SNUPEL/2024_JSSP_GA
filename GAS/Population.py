@@ -21,6 +21,7 @@ import numpy as np
 import random
 from GAS.Individual import Individual
 from Data.Dataset.Dataset import Dataset
+# from Data.Dataset.Dataset_jsplib import Dataset
 # from baseline import baseline
 from Comparison.baseline import baseline, GifflerandThompson
 
@@ -412,8 +413,8 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = individuals_1 + individuals_2
 
-        print(f"{50} SPT individuals and {50} RUBI individuals generated!")
-        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        # print(f"{50} SPT individuals and {50} RUBI individuals generated!")
+        # print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
@@ -429,8 +430,8 @@ class Population:
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = individuals_2
 
-        print(f"{100} Modified RUBI individuals generated!")
-        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        # print(f"{100} Modified RUBI individuals generated!")
+        # print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
@@ -460,8 +461,8 @@ class Population:
         individuals_2 = [Individual(config, seq=random.sample(range(config.n_op), config.n_op), op_data=dataset.op_data) for _ in range(num_RANDOM)]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = individuals_1 + individuals_2
-        print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
-        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        # print(f"{num_MIO} MIO individuals and {num_RANDOM} RANDOM individuals generated!")
+        # print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     ##############################################  
@@ -476,8 +477,8 @@ class Population:
         SPT_individuals = [Individual(config, seq=spt_seq[1], op_data=dataset.op_data) for spt_seq in SPT]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = SPT_individuals
-        print(config.population_size, "개의 SPT individuals 가 생성되었습니다!")
-        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        # print(config.population_size, "개의 SPT individuals 가 생성되었습니다!")
+        # print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
@@ -487,8 +488,8 @@ class Population:
         GT_individuals = [Individual(config, seq=gt_seq, op_data=dataset.op_data) for gt_seq in GT]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = GT_individuals
-        print(config.population_size, "개의 GT individuals 가 생성되었습니다!")
-        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        # print(config.population_size, "개의 GT individuals 가 생성되었습니다!")
+        # print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod
@@ -498,8 +499,8 @@ class Population:
         LPT_individuals = [Individual(config, seq=lpt_seq[1], op_data=dataset.op_data) for lpt_seq in LPT]
         population = cls(config, dataset.op_data)  # Create the Population instance with required arguments
         population.individuals = LPT_individuals
-        print(config.population_size, "개의 LPT individuals 가 생성되었습니다!")
-        print('Initial Population:',min([ind.makespan for ind in population.individuals]))
+        # print(config.population_size, "개의 LPT individuals 가 생성되었습니다!")
+        # print('Initial Population:',min([ind.makespan for ind in population.individuals]))
         return population
 
     @classmethod

@@ -351,28 +351,30 @@ if __name__ == "__main__":
     #     for file in files:
     #         if file.endswith('.txt'):
     #             directories.append(file)
-    directories=['la01.txt',
-                 'la02.txt',
-                 'la03.txt',
-                 'la04.txt',
-                 'la05.txt',
-                 'la06.txt',
-                 'la07.txt',
-                 'la08.txt',
-                 'la09.txt',
-                 'la10.txt',
-                 'la11.txt',
-                 'la12.txt',
-                 'la13.txt',
-                 'la14.txt',
-                 'la15.txt',
-                 'la16.txt',
-                 'la17.txt',
-                 'la18.txt',
-                 'la19.txt',
-                 'la20.txt']
+    directories = ['../Data/Dataset/APMS/dmu80.txt']
+    # directories=['la01.txt',
+    #              'la02.txt',
+    #              'la03.txt',
+    #              'la04.txt',
+    #              'la05.txt',
+    #              'la06.txt',
+    #              'la07.txt',
+    #              'la08.txt',
+    #              'la09.txt',
+    #              'la10.txt',
+    #              'la11.txt',
+    #              'la12.txt',
+    #              'la13.txt',
+    #              'la14.txt',
+    #              'la15.txt',
+    #              'la16.txt',
+    #              'la17.txt',
+    #              'la18.txt',
+    #              'la19.txt',
+    #              'la20.txt']
+    # optimal
     # optimal = [945,848,842,902]
-    optimal = [666,655,597,590,593,926,890,863,951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
+    # optimal = [666,655,597,590,593,926,890,863,951,958,1222,1039,1150,1292,1207,945,784,848,842,902]
     # optimal={'abz5':1234,
     #          'abz6':943,
     #          'abz7':656,
@@ -399,11 +401,11 @@ if __name__ == "__main__":
             for ini in ['GT']:
             # for ini in ['RANDOM', 'RUBI', 'SPT', 'LPT']:
                 kwargs = {'_file': ins,
-                          '_resultfile': '../result/250528.csv',
+                          '_resultfile': '../result/260504.csv',
                           '_instance': ins.split('.')[0],
                           '_initialization': ini,
                           '_seed': seed,
-                          '_optimal': optimal[i],
+                          '_optimal': None,
                           '_record':True if seed == 0 else False}
                 main(kwargs)
 

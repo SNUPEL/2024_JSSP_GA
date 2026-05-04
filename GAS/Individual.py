@@ -73,7 +73,7 @@ class Individual:
         self.feasible_seq = self.get_feasible()
         self.machine_order = self.get_machine_order()
         self.makespan, self.mio_score = self.evaluate(self.machine_order)
-        self.score = calculate_score(self.MIO, self.MIO_sorted)
+        # self.score = calculate_score(self.MIO, self.MIO_sorted)
         self.calculate_fitness()  # Ensure target_makespan is passed
 
     def __str__(self):

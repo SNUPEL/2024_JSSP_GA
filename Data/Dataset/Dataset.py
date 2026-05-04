@@ -65,8 +65,8 @@ class Dataset:
             self.machine_data.append([])
             self.pt_data.append([])
             for j in range(self.n_machine):
-                self.op_data[i].append((data.iloc[self.n_job + i, j] - 1, data.iloc[i, j]))
-                self.machine_data[i].append(data.iloc[self.n_job + i, j] - 1)
+                self.op_data[i].append((int(data.iloc[self.n_job + i, j]) - 1, data.iloc[i, j]))
+                self.machine_data[i].append(int(data.iloc[self.n_job + i, j]) - 1)
                 self.pt_data[i].append(data.iloc[i, j])
         self.n_solution = 0  # Initialize the number of solutions to 0
         self.I_b = self.calculate_bottleneck_index()
@@ -77,8 +77,8 @@ class Dataset:
 
         for n in range(self.n_job):
             for i in range(self.n_machine - 1):
-                first = self.machine_data[n][i]
-                second = self.machine_data[n][i + 1]
+                first = int(self.machine_data[n][i])
+                second = int(self.machine_data[n][i + 1])
                 I_ik[first, second] += 1
         I_f = np.subtract(I_ik, 1)
         I_f = I_f.clip(min=0)
@@ -90,7 +90,7 @@ class Dataset:
         I_ik = np.zeros((self.n_machine, self.n_machine))
         for i in range(self.n_machine):  # machine i
             for k in range(self.n_machine):  # appears as k-th operation
-                is_kth = [True if self.op_data[n][k][0] == i else False for n in range(self.n_machine)]
+                is_kth = [True if self.op_data[n][k][0] == i else False for n in range(self.n_job)]
                 I_ik[i, k] += sum(is_kth)
 
         I_b = np.subtract(I_ik, 1)

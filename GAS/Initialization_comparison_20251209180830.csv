@@ -1,0 +1,1 @@
+num_job,num_machine,mean,std,seed,I_b,I_f,baseline,RANDOM_best,RANDOM_time,RUBI_best,RUBI_time,SPT_best,SPT_time,LPT_best,LPT_time,GT_best,GT_time
